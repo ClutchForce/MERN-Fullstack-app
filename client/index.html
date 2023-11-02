@@ -9,5 +9,23 @@
 </head>
 <body>
     <h1>Superheros</h1>
+    <!-- Search Form -->
+    <form id="search-form">
+        <label for="search-field">Search Field:</label>
+        <input type="text" id="search-field" name="search-field" required>
+        <label for="search-pattern">Search Pattern:</label>
+        <input type="text" id="search-pattern" name="search-pattern" required>
+        <label for="num-results">Number of Results:</label>
+        <input type="number" id="num-results" name="num-results" min="1">
+        <button type="submit">Search</button>
+    </form>
+    <!-- List Management Form -->
+    <form id="list-form">
+        <label for="list-name">List Name:</label>
+        <input type="text" id="list-name" name="list-name" required>
+        <label for="superhero-ids">Superhero IDs (comma-separated):</label>
+        <input type="text" id="superhero-ids" name="superhero-ids" required>
+        <button type="submit">Save List</button>
+    </form>
 </body>
 </html>
