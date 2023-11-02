@@ -1,3 +1,4 @@
+// Required modules
 const express = require('express');
 const { check, validationResult } = require('express-validator');
 const path = require('path');
@@ -5,31 +6,35 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const fs = require('fs');
 
-// Add this line to use express.json middleware
+// Middleware to parse JSON bodies
 app.use(express.json());
 
+// Function to read superhero information from file
 function readSuperheroInfo() {
   const data = fs.readFileSync(path.join(__dirname,'../superhero_info.json'), 'utf-8');
   return JSON.parse(data);
 }
 
+// Function to read superhero powers from file
 function readSuperheroPowers() {
     const data = fs.readFileSync(path.join(__dirname,'../superhero_powers.json'), 'utf-8');
     return JSON.parse(data);
 }
 
+// Function to get a list of unique publishers from superhero data
 function getUniquePublishers() {
     const superheroes = readSuperheroInfo();
     const publishers = new Set(superheroes.map(hero => hero.Publisher));
     return Array.from(publishers);
 }
 
+// Function to get superhero data by ID
 function getSuperheroById(id) {
     const superheroes = readSuperheroInfo();
     return superheroes.find(hero => hero.id === parseInt(id));
 }
   
-  
+// Function to search superheroes by a specified field and pattern
 function searchSuperheroes(field, pattern, n) {
     const superheroes = readSuperheroInfo();
     const filteredHeroes = superheroes
@@ -38,6 +43,7 @@ function searchSuperheroes(field, pattern, n) {
     return filteredHeroes.map(hero => hero.id);
 }
 
+// Middleware to serve static files from client directory
 app.use(express.static(path.join(__dirname, '../client')));
 
 // Centralized error handling middleware
@@ -46,19 +52,23 @@ app.use((err, req, res, next) => {
     res.status(500).send('Something went wrong!');
 });  
 
+// Route to serve the front-end application
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../client/index.html'));
 });
 
+// Starting the server
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
 
+// Endpoint to get a list of all unique publishers
 app.get('/api/publishers', (req, res) => {
     const publishers = getUniquePublishers();
     res.json(publishers);
 });
   
+// Endpoint to search superheroes by a specified field and pattern
 app.get('/api/superheroes/search', (req, res) => {
     const { field, pattern, n } = req.query;
     
@@ -74,6 +84,7 @@ app.get('/api/superheroes/search', (req, res) => {
     res.json(superheroIds);
 });
 
+// Endpoint to get superhero data by ID
 app.get('/api/superheroes/:id', (req, res) => {
     const superhero = getSuperheroById(req.params.id);
     
@@ -84,6 +95,7 @@ app.get('/api/superheroes/:id', (req, res) => {
     res.json(superhero);
 });
   
+// Endpoint to get superhero powers by superhero ID
 app.get('/api/superheroes/:id/powers', (req, res) => {
     const superhero = getSuperheroById(req.params.id);
     
@@ -103,6 +115,7 @@ app.get('/api/superheroes/:id/powers', (req, res) => {
     res.json(powers);
 });
   
+// Endpoint to create a new superhero list
 // Updated POST /api/lists with validation
 app.post('/api/lists', [
     check('listName').trim().escape().notEmpty(),
@@ -131,6 +144,7 @@ app.post('/api/lists', [
     res.status(201).send('List created');
 });
 
+// Endpoint to update a superhero list by name
 // Updated PUT /api/lists/:listName with validation
 app.put('/api/lists/:listName', [
     check('listName').trim().escape().notEmpty(),
@@ -140,7 +154,7 @@ app.put('/api/lists/:listName', [
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    
+
     const { listName } = req.params;
     const { superheroIds } = req.body;
   
@@ -157,6 +171,7 @@ app.put('/api/lists/:listName', [
     res.send('List updated');
 });
 
+// Endpoint to get superhero IDs in a list by list name
 app.get('/api/lists/:listName', (req, res) => {
     const { listName } = req.params;
   
@@ -170,6 +185,7 @@ app.get('/api/lists/:listName', (req, res) => {
     res.json(listsData[listName]);
 });
   
+// Endpoint to delete a superhero list by name
 app.delete('/api/lists/:listName', (req, res) => {
     const { listName } = req.params;
   
@@ -186,6 +202,7 @@ app.delete('/api/lists/:listName', (req, res) => {
     res.send('List deleted');
 });
   
+// Endpoint to get details of superheroes in a list by list name
 app.get('/api/lists/:listName/details', (req, res) => {
     const { listName } = req.params;
   
