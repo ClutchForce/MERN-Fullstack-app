@@ -33,6 +33,26 @@ function getSuperheroById(id) {
     const superheroes = readSuperheroInfo();
     return superheroes.find(hero => hero.id === parseInt(id));
 }
+
+// Function to get superhero powers by superhero ID
+function getSuperheroPowersById(superheroId) {
+    const superheroes = readSuperheroInfo();
+    const powers = readSuperheroPowers();
+    const superhero = superheroes.find(hero => hero.id === superheroId);
+    if (!superhero) {
+        return [];  // just leave empty
+    }
+    const superheroName = superhero.name;
+    const powersObject = powers.find(powerInfo => powerInfo.hero_names === superheroName);
+    if (!powersObject) {
+        return [];  // hero not found in powers file therefore has no powers
+    }
+    // Process the powers object to return only the powers the superhero has
+    const powersArray = Object.keys(powersObject)
+        .filter(power => powersObject[power] === "True")
+        .map(power => power.replace(/_/g, ' '));  // Replace underscores with spaces
+    return powersArray;
+}
   
 // Function to search superheroes by a specified field and pattern
 function searchSuperheroes(field, pattern, n) {
@@ -109,7 +129,8 @@ app.get('/api/superheroes/:id/powers', (req, res) => {
     const powers = superheroPowers.find(powerInfo => powerInfo.hero_names === superheroName);
     
     if (!powers) {
-      return res.status(404).send('Powers not found for the given superhero ID');
+      //return res.status(404).send('Powers not found for the given superhero ID');
+        return res.json([]);  // just leave empty
     }
   
     res.json(powers);
@@ -171,6 +192,13 @@ app.put('/api/lists/:listName', [
     res.send('List updated');
 });
 
+// Endpoint to get all superhero lists
+app.get('/api/lists', (req, res) => {
+    const listsPath = path.join(__dirname, '../superhero_lists.json');
+    const listsData = JSON.parse(fs.readFileSync(listsPath, 'utf8'));
+    res.json(Object.keys(listsData));  // Send the names of all lists as an array
+});
+
 // Endpoint to get superhero IDs in a list by list name
 app.get('/api/lists/:listName', (req, res) => {
     const { listName } = req.params;
@@ -210,24 +238,20 @@ app.get('/api/lists/:listName/details', (req, res) => {
     const listsData = JSON.parse(fs.readFileSync(listsPath, 'utf8'));
   
     if (!listsData[listName]) {
-      return res.status(404).send('List not found');
+        return res.status(404).send('List not found');
     }
   
     const superheroes = readSuperheroInfo();
-    const powers = readSuperheroPowers();
     
     const listDetails = listsData[listName].map(id => {
-      const superhero = superheroes.find(hero => hero.id === id);
-      return {
-        name: superhero.name,
-        info: superhero,
-        powers: powers[id] || []
-      };
+        const superhero = superheroes.find(hero => hero.id === id);
+        const powersArray = getSuperheroPowersById(id);
+        return {
+            name: superhero.name,
+            info: superhero,
+            powers: powersArray || []  // will return empty array if no powers
+        };
     });
   
     res.json(listDetails);
 });
-  
-
-
-  
