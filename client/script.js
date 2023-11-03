@@ -118,7 +118,8 @@ function displaySearchResults(data) {
         .then(superheroes => {
             superheroes.forEach(superheroInfo => {
                 const resultItem = document.createElement('div');
-                resultItem.textContent = JSON.stringify(superheroInfo, null, 2);
+                const superheroInfoTextNode = document.createTextNode(JSON.stringify(superheroInfo, null, 2));
+                resultItem.appendChild(superheroInfoTextNode);
                 resultsContainer.appendChild(resultItem);
             });
         })
@@ -187,17 +188,18 @@ function fetchLists() {
     .catch(error => console.error('Error:', error));
 }
 
-
-// Create a new function to display a single list
+// Update the displayList function
 function displayList(listName, superheroes) {
     const listsContainer = document.getElementById('lists-container');
     const listDiv = document.createElement('div');
     listDiv.className = 'list';
-    listDiv.textContent = listName;
+    const listNameTextNode = document.createTextNode(listName);
+    listDiv.appendChild(listNameTextNode);
     listsContainer.appendChild(listDiv);
     superheroes.forEach(superhero => {
         const superheroDiv = document.createElement('div');
-        superheroDiv.textContent = JSON.stringify(superhero, null, 2);
+        const superheroInfoTextNode = document.createTextNode(JSON.stringify(superhero, null, 2));
+        superheroDiv.appendChild(superheroInfoTextNode);
         listDiv.appendChild(superheroDiv);
     });
 }

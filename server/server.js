@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 3000;
 const fs = require('fs');
 
 // Middleware to parse JSON bodies
-app.use(express.json());
+app.use(express.json({ encoding: 'utf8' }));
 
 // Function to read superhero information from file
 function readSuperheroInfo() {
@@ -139,7 +139,7 @@ app.get('/api/superheroes/:id/powers', (req, res) => {
 // Endpoint to create a new superhero list
 // Updated POST /api/lists with validation
 app.post('/api/lists', [
-    check('listName').trim().escape().notEmpty(),
+    check('listName').trim().escape().notEmpty().withMessage('List name is required'),
   ], (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -168,7 +168,7 @@ app.post('/api/lists', [
 // Endpoint to update a superhero list by name
 // Updated PUT /api/lists/:listName with validation
 app.put('/api/lists/:listName', [
-    check('listName').trim().escape().notEmpty(),
+    check('listName').trim().escape().notEmpty().withMessage('List name is required'),
     check('superheroIds').isArray(),
   ], (req, res) => {
     const errors = validationResult(req);
