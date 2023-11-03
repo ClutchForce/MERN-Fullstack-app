@@ -247,7 +247,7 @@ app.get('/api/lists/:listName/details', (req, res) => {
         const superhero = superheroes.find(hero => hero.id === id);
         const powersArray = getSuperheroPowersById(id);
         return {
-            name: superhero.name,
+            name: superhero.name || 'no-name',
             info: superhero,
             powers: powersArray || []  // will return empty array if no powers
         };
