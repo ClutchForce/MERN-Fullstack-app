@@ -117,7 +117,7 @@ function displaySearchResults(data) {
     const table = document.createElement('table');
     // Create a table header row
     const headerRow = document.createElement('tr');
-    const headers = ['Name', 'Gender', 'Eye Color', 'Race', 'Hair Color', 'Height', 'Publisher', 'Skin Color', 'Alignment', 'Weight', 'Powers'];
+    const headers = ['ID','Name', 'Gender', 'Eye Color', 'Race', 'Hair Color', 'Height', 'Publisher', 'Skin Color', 'Alignment', 'Weight', 'Powers'];
     headers.forEach(headerText => {
         const th = document.createElement('th');
         th.appendChild(document.createTextNode(headerText));
@@ -129,6 +129,7 @@ function displaySearchResults(data) {
     data.forEach(superheroInfo => {
         const row = document.createElement('tr');
         const rowData = [
+            superheroInfo.id,
             superheroInfo.name,
             superheroInfo.Gender,
             superheroInfo['Eye color'],
@@ -154,44 +155,81 @@ function displaySearchResults(data) {
 }
 
 
-// Function sends a request to the server to create a new list when the form is submitted
+// Function sends a request to the server to create or update a list when the form is submitted
 function handleListFormSubmit(event) {
     event.preventDefault();
     const listName = document.getElementById('list-name').value;
     const superheroIds = document.getElementById('superhero-ids').value.split(',').map(id => parseInt(id.trim()));
 
-    // First, create the list
-    fetch('/api/lists', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ listName }),
-    })
-    .then(response => {
-        if (!response.ok) {
-            // Handle non-successful responses
-            return response.text().then(text => { throw new Error(text); });
-        }
-        // If the list is created successfully, update it with the superhero IDs
-        return fetch(`/api/lists/${listName}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ superheroIds }),
-        });
-    })
-    .then(response => {
-        if (!response.ok) {
-            // Handle non-successful responses
-            return response.text().then(text => { throw new Error(text); });
-        }
-        // Refresh the list of lists after the new list is created and updated
-        fetchLists();
-    })
-    .catch(error => console.error('Error:', error));
+    // Function to compare two arrays of IDs to see if they are different
+    function arraysDiffer(a, b) {
+        return a.length !== b.length || a.some((item, index) => item !== b[index]);
+    }
+
+    // Check if the list already exists
+    fetch(`/api/lists/${listName}`)
+        .then(response => {
+            if (response.ok) {
+                // If the list exists, get its superhero IDs and compare them to the new IDs
+                return response.json().then(existingIds => {
+                    if (arraysDiffer(existingIds, superheroIds)) {
+                        // If the IDs are different, update the list
+                        return fetch(`/api/lists/${listName}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ superheroIds }),
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                // Handle non-successful responses
+                                return response.text().then(text => { throw new Error(text); });
+                            }
+                            // Refresh the list of lists after the list is updated
+                            fetchLists();
+                        });
+                    } else {
+                        // If the IDs are the same, log an appropriate error message
+                        console.error(`The superhero IDs for the list "${listName}" are already up to date.`);
+                    }
+                });
+            } else {
+                // If the list doesn't exist, create it
+                return fetch('/api/lists', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ listName }),
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        // Handle non-successful responses
+                        return response.text().then(text => { throw new Error(text); });
+                    }
+                    // If the list is created successfully, update it with the superhero IDs
+                    return fetch(`/api/lists/${listName}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ superheroIds }),
+                    });
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        // Handle non-successful responses
+                        return response.text().then(text => { throw new Error(text); });
+                    }
+                    // Refresh the list of lists after the new list is created and updated
+                    fetchLists();
+                });
+            }
+        })
+        .catch(error => console.error('Error handleListFormSubmit:', error));
 }
+
 
 // Function to fetch the existing lists from the server and display them on the page
 // Update to the fetchLists function to sort the data before displaying it
@@ -211,7 +249,7 @@ function fetchLists() {
             });
         });
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => console.error('Error fetchLists:', error));
 }
 
 // Update the displayList function
@@ -241,9 +279,16 @@ function displayList(listName, superheroes) {
         superheroDiv.className = 'superhero';
         superheroDiv.innerHTML = `
             <h3>${document.createTextNode(superhero.name).textContent}</h3>
+            <p>ID: ${document.createTextNode(superhero.info.id).textContent}</p>
             <p>Gender: ${document.createTextNode(superhero.info.Gender).textContent}</p>
+            <p>Eye Color: ${document.createTextNode(superhero.info['Eye color']).textContent}</p>
             <p>Race: ${document.createTextNode(superhero.info.Race).textContent}</p>
+            <p>Hair Color: ${document.createTextNode(superhero.info['Hair color']).textContent}</p>
+            <p>Height: ${document.createTextNode(superhero.info.Height).textContent}</p>
             <p>Publisher: ${document.createTextNode(superhero.info.Publisher).textContent}</p>
+            <p>Skin color: ${document.createTextNode(superhero.info['Skin color']).textContent}</p>
+            <p>Alignment: ${document.createTextNode(superhero.info.Alignment).textContent}</p>
+            <p>Weight: ${document.createTextNode(superhero.info.Weight).textContent}</p>
             <p>Powers: ${superhero.powers.map(power => document.createTextNode(power).textContent).join(', ')}</p>
         `;
         listDiv.appendChild(superheroDiv);
@@ -280,7 +325,7 @@ function fetchListDetails(listName) {
             resolve(superheroes);
         })
         .catch(error => {
-            console.error('Error:', error);
+            console.error('Error fetchListDetails:', error);
             reject(error);
         });
     });
@@ -297,9 +342,49 @@ function deleteList(listName) {
         // Refresh the list of lists after a list is deleted
         fetchLists();
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => console.error('Error deleteList:', error));
     //refresh the search results as well if needed
     fetchLists();
+}
+
+// Function to fetch the superhero IDs in a list by list name
+function fetchListNames() {
+    return fetch('/api/lists')
+        .then(response => response.json())
+        .catch(error => console.error('Error fetchListNames:', error));
+}
+
+// Function to fetch the superhero IDs in a list by list name
+function populateListNameDropdown(listNames) {
+    const listNameDropdown = document.getElementById('list-name-dropdown');
+    listNameDropdown.innerHTML = '';  // Clear existing items
+    listNames.forEach(listName => {
+        const dropdownItem = document.createElement('div');
+        dropdownItem.className = 'dropdown-item';
+        dropdownItem.setAttribute('data-value', listName);
+        dropdownItem.textContent = listName;
+        listNameDropdown.appendChild(dropdownItem);
+    });
+    // Update input value, hide dropdown, and fetch superhero IDs when a dropdown item is clicked
+    listNameDropdown.querySelectorAll('.dropdown-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const listNameField = document.getElementById('list-name');
+            listNameField.value = item.getAttribute('data-value');
+            listNameDropdown.style.display = 'none';
+            fetchListSuperheroIds(listNameField.value);
+        });
+    });
+}
+
+// Function to fetch the superhero IDs in a list by list name
+function fetchListSuperheroIds(listName) {
+    fetch(`/api/lists/${listName}`)
+        .then(response => response.json())
+        .then(data => {
+            const superheroIdsField = document.getElementById('superhero-ids');
+            superheroIdsField.value = data.join(', ');  // simply join the data as it's already an array of IDs
+        })
+        .catch(error => console.error('Error:', error));
 }
 
 // Add an event listener to the name search field
@@ -357,7 +442,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         fetch('http://localhost:3000/api/publishers')
             .then(response => response.json())
             .then(data => populatePatternDropdown(data))
-            .catch(error => console.error('Error:', error));
+            .catch(error => console.error('Error fetchPublishers:', error));
     }
 
     // Show or hide pattern dropdown based on search field value
@@ -392,7 +477,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 const powers = Object.keys(data).slice(1);  // Exclude the first key "hero_names"
                 populatePatternDropdown(powers);
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => console.error('Error fetchPowers:', error));
     }
 
     // Show or hide pattern dropdown based on search field value
@@ -408,6 +493,29 @@ document.addEventListener('DOMContentLoaded', (event) => {
             patternDropdown.style.display = 'none';
         }
     });
+
+    const listNameField = document.getElementById('list-name');
+    const listNameDropdown = document.createElement('div');
+    listNameDropdown.id = 'list-name-dropdown';
+    listNameDropdown.className = 'dropdown-content';
+    listNameField.parentNode.appendChild(listNameDropdown);
+
+    // Show list name dropdown when input is clicked
+    listNameField.addEventListener('click', () => {
+        fetchListNames()
+            .then(data => {
+                populateListNameDropdown(data);
+                listNameDropdown.style.display = 'block';
+            });
+    });
+
+    // Hide list name dropdown when anything other than the dropdown is clicked
+    window.addEventListener('click', (event) => {
+        if (event.target !== listNameField && event.target.parentNode !== listNameDropdown) {
+            listNameDropdown.style.display = 'none';
+        }
+    });
+
 });
 
 // Add an event listener to the toggle-sort-order button

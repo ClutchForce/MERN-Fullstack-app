@@ -46,9 +46,14 @@
     <!-- List Management Form -->
     <form id="list-form">
         <label for="list-name">List Name:</label>
-        <input type="text" id="list-name" name="list-name" required>
+        <div id = "list-name-container">
+            <input type="text" id="list-name" name="list-name" placeholder="Click to add new list or edit existing list..." required>
+            <div id="list-dropdown" class="dropdown-content"></div>
+        </div>
         <label for="superhero-ids">Superhero IDs (comma-separated):</label>
-        <input type="text" id="superhero-ids" name="superhero-ids" required>
+        <div id="superhero-ids-container">
+            <input type="text" id="superhero-ids" name="superhero-ids" required>
+        </div>
         <button type="submit">Save List</button>
     </form>
     <!-- Lists Container -->
