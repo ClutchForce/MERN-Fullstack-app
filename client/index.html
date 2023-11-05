@@ -23,9 +23,20 @@
     <!-- Search Form -->
     <form id="search-form">
         <label for="search-field">Search Field:</label>
-        <input type="text" id="search-field" name="search-field" required>
+        <div id="search-field-container">
+            <input type="text" id="search-field" name="search-field" required>
+            <div id="search-dropdown" class="dropdown-content">
+                <div class="dropdown-item" data-value="name">Name</div>
+                <div class="dropdown-item" data-value="race">Race</div>
+                <div class="dropdown-item" data-value="publisher">Publisher</div>
+                <div class="dropdown-item" data-value="power">Power</div>
+            </div>
+        </div>
         <label for="search-pattern">Search Pattern:</label>
-        <input type="text" id="search-pattern" name="search-pattern" required>
+        <div id="search-pattern-container">
+            <input type="text" id="search-pattern" name="search-pattern" required>
+            <div id="pattern-dropdown" class="dropdown-content"></div>
+        </div>
         <label for="num-results">Number of Results:</label>
         <input type="number" id="num-results" name="num-results" min="1">
         <button type="submit">Search</button>

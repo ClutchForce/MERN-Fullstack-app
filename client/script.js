@@ -108,25 +108,51 @@ async function getSuperheroInfo(superheroId) {
 function displaySearchResults(data) {
     console.log('displaySearchResults', data);
     const resultsContainer = document.getElementById('results-container');
-    resultsContainer.innerHTML = '';
+    resultsContainer.innerHTML = '';  // Clear any previous search results
     if (data.length === 0) {
         resultsContainer.textContent = 'No results found.';
         return;
     }
-    // Use Promise.all to fetch and display information for all superheroes concurrently
-    Promise.all(data.map(superheroId => getSuperheroInfo(superheroId.id)))
-        .then(superheroes => {
-            superheroes.forEach(superheroInfo => {
-                const resultItem = document.createElement('div');
-                const superheroInfoTextNode = document.createTextNode(JSON.stringify(superheroInfo, null, 2));
-                resultItem.appendChild(superheroInfoTextNode);
-                resultsContainer.appendChild(resultItem);
-            });
-        })
-        .catch(error => {
-            console.error('There has been a problem with your fetch operation:', error);
+    // Create a table element
+    const table = document.createElement('table');
+    // Create a table header row
+    const headerRow = document.createElement('tr');
+    const headers = ['Name', 'Gender', 'Eye Color', 'Race', 'Hair Color', 'Height', 'Publisher', 'Skin Color', 'Alignment', 'Weight', 'Powers'];
+    headers.forEach(headerText => {
+        const th = document.createElement('th');
+        th.appendChild(document.createTextNode(headerText));
+        headerRow.appendChild(th);
+    });
+    table.appendChild(headerRow);
+
+    // Add each superhero's data as a row in the table
+    data.forEach(superheroInfo => {
+        const row = document.createElement('tr');
+        const rowData = [
+            superheroInfo.name,
+            superheroInfo.Gender,
+            superheroInfo['Eye color'],
+            superheroInfo.Race,
+            superheroInfo['Hair color'],
+            superheroInfo.Height,
+            superheroInfo.Publisher,
+            superheroInfo['Skin color'],
+            superheroInfo.Alignment,
+            superheroInfo.Weight,
+            superheroInfo.powers.join(', ')
+        ];
+        rowData.forEach(dataText => {
+            const td = document.createElement('td');
+            td.appendChild(document.createTextNode(dataText));
+            row.appendChild(td);
         });
+        table.appendChild(row);
+    });
+
+    // Append the table to the results container
+    resultsContainer.appendChild(table);
 }
+
 
 // Function sends a request to the server to create a new list when the form is submitted
 function handleListFormSubmit(event) {
@@ -187,32 +213,6 @@ function fetchLists() {
     })
     .catch(error => console.error('Error:', error));
 }
-
-// Update the displayList function
-// function displayList(listName, superheroes) {
-//     const listsContainer = document.getElementById('lists-container');
-//     const listDiv = document.createElement('div');
-//     listDiv.className = 'list';
-//     const listNameTextNode = document.createTextNode(listName);
-//     listDiv.appendChild(listNameTextNode);
-//     listsContainer.appendChild(listDiv);
-//     superheroes.forEach(superhero => {
-//         // const superheroDiv = document.createElement('div');
-//         // const superheroInfoTextNode = document.createTextNode(JSON.stringify(superhero, null, 2));
-//         // superheroDiv.appendChild(superheroInfoTextNode);
-//         // listDiv.appendChild(superheroDiv);
-//         const superheroDiv = document.createElement('div');
-//         superheroDiv.className = 'superhero';
-//         superheroDiv.innerHTML = `
-//             <h3>${superhero.name}</h3>
-//             <p>Gender: ${superhero.info.Gender}</p>
-//             <p>Race: ${superhero.info.Race}</p>
-//             <p>Publisher: ${superhero.info.Publisher}</p>
-//             <p>Powers: ${superhero.powers.join(', ')}</p>
-//         `;
-//         listDiv.appendChild(superheroDiv);
-//     });
-// }
 
 // Update the displayList function
 function displayList(listName, superheroes) {
@@ -286,7 +286,6 @@ function fetchListDetails(listName) {
     });
 }
 
-
 //Add a function to delete a list
 function deleteList(listName) {
     console.log('deleteList', listName);
@@ -302,6 +301,114 @@ function deleteList(listName) {
     //refresh the search results as well if needed
     fetchLists();
 }
+
+// Add an event listener to the name search field
+document.addEventListener('DOMContentLoaded', (event) => {
+    const searchField = document.getElementById('search-field');
+    const searchDropdown = document.getElementById('search-dropdown');
+    const dropdownItems = document.querySelectorAll('.dropdown-item');
+
+    // Show dropdown when input is clicked
+    searchField.addEventListener('click', () => {
+        searchDropdown.style.display = 'block';
+    });
+
+    // Hide dropdown when anything other than the dropdown is clicked
+    window.addEventListener('click', (event) => {
+        if (event.target !== searchField && event.target.parentNode !== searchDropdown) {
+            searchDropdown.style.display = 'none';
+        }
+    });
+
+    // Update input value and hide dropdown when a dropdown item is clicked
+    dropdownItems.forEach(item => {
+        item.addEventListener('click', () => {
+            searchField.value = item.getAttribute('data-value');
+            searchDropdown.style.display = 'none';
+        });
+    });
+    // code to handle search pattern dropdown
+    const searchPattern = document.getElementById('search-pattern');
+    const patternDropdown = document.getElementById('pattern-dropdown');
+
+    // Function to populate the pattern dropdown
+    function populatePatternDropdown(publishers) {
+        patternDropdown.innerHTML = '';  // Clear existing items
+        publishers.forEach(publisher => {
+            if (publisher) {  // Ignore empty strings
+                const dropdownItem = document.createElement('div');
+                dropdownItem.className = 'dropdown-item';
+                dropdownItem.setAttribute('data-value', publisher);
+                dropdownItem.textContent = publisher;
+                patternDropdown.appendChild(dropdownItem);
+            }
+        });
+        // Update input value and hide dropdown when a dropdown item is clicked
+        patternDropdown.querySelectorAll('.dropdown-item').forEach(item => {
+            item.addEventListener('click', () => {
+                searchPattern.value = item.getAttribute('data-value');
+                patternDropdown.style.display = 'none';
+            });
+        });
+    }
+
+    // Function to fetch publishers and populate the pattern dropdown
+    function fetchPublishers() {
+        fetch('http://localhost:3000/api/publishers')
+            .then(response => response.json())
+            .then(data => populatePatternDropdown(data))
+            .catch(error => console.error('Error:', error));
+    }
+
+    // Show or hide pattern dropdown based on search field value
+    searchPattern.addEventListener('click', () => {
+        if (searchField.value.toLowerCase() === 'publisher') {
+            fetchPublishers();  // Fetch publishers if not already fetched
+            patternDropdown.style.display = 'block';
+        } else {
+            patternDropdown.style.display = 'none';
+        }
+    });
+
+    // Hide pattern dropdown when anything other than the dropdown is clicked
+    window.addEventListener('click', (event) => {
+        if (event.target !== searchPattern && event.target.parentNode !== patternDropdown) {
+            patternDropdown.style.display = 'none';
+        }
+    });
+
+    // Show pattern dropdown when input is clicked, if search field value is 'publisher'
+    searchPattern.addEventListener('click', () => {
+        if (searchField.value.toLowerCase() === 'publisher') {
+            patternDropdown.style.display = 'block';
+        }
+    });
+
+    // Function to fetch powers and populate the pattern dropdown
+    function fetchPowers() {
+        fetch('http://localhost:3000/api/superheroes/0/powers')
+            .then(response => response.json())
+            .then(data => {
+                const powers = Object.keys(data).slice(1);  // Exclude the first key "hero_names"
+                populatePatternDropdown(powers);
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // Show or hide pattern dropdown based on search field value
+    searchPattern.addEventListener('click', () => {
+        const searchFieldValue = searchField.value.toLowerCase();
+        if (searchFieldValue === 'publisher') {
+            fetchPublishers();  // Fetch publishers if not already fetched
+            patternDropdown.style.display = 'block';
+        } else if (searchFieldValue === 'power') {
+            fetchPowers();  // Fetch powers if not already fetched
+            patternDropdown.style.display = 'block';
+        } else {
+            patternDropdown.style.display = 'none';
+        }
+    });
+});
 
 // Add an event listener to the toggle-sort-order button
 document.getElementById('toggle-sort-order').addEventListener('click', toggleSortOrder);

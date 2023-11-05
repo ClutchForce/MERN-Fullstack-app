@@ -56,6 +56,14 @@ function getSuperheroPowersById(superheroId) {
   
 // Function to search superheroes by a specified field and pattern
 function searchSuperheroes(field, pattern, n) {
+    // If field isnt name, capitalize first letter
+    if (field.toLowerCase() === 'name') {
+      field = 'name';
+    } else {
+      field = field.charAt(0).toUpperCase() + field.slice(1);
+    }
+
+
     const superheroes = readSuperheroInfo();
     const filteredHeroes = superheroes
       .filter(hero => new RegExp(pattern, 'i').test(hero[field]))
