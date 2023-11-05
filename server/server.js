@@ -63,11 +63,32 @@ function searchSuperheroes(field, pattern, n) {
       field = field.charAt(0).toUpperCase() + field.slice(1);
     }
 
+    if (field === 'Power') {
+        return searchSuperheroesByPower(pattern, n);
+    }
 
     const superheroes = readSuperheroInfo();
     const filteredHeroes = superheroes
       .filter(hero => new RegExp(pattern, 'i').test(hero[field]))
       .slice(0, n || superheroes.length);
+    return filteredHeroes.map(hero => hero.id);
+}
+
+// Function to search superheroes by power
+function searchSuperheroesByPower(pattern, n){
+    const superheroes = readSuperheroInfo();
+    const powers = readSuperheroPowers();
+    const filteredHeroes = superheroes
+        .filter(hero => {
+            const powersObject = powers.find(powerInfo => powerInfo.hero_names === hero.name);
+            if (!powersObject) {
+                return false;  // hero not found in powers file therefore has no powers
+            }
+            const powersArray = Object.keys(powersObject)
+                .filter(power => powersObject[power] === "True");
+            return powersArray.some(power => new RegExp(pattern, 'i').test(power));
+        })
+        .slice(0, n || superheroes.length);
     return filteredHeroes.map(hero => hero.id);
 }
 
