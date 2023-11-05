@@ -43,3 +43,43 @@ button {
 button:hover {
     background-color: #005f5f;
 }
+
+.result-item, .list, .superhero {
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.result-item h2, .list h2, .superhero h3 {
+    margin-top: 0;
+}
+
+.list .superhero {
+    margin-top: 10px;
+    margin-left: 20px;
+}
+
+#results-container, #lists-container {
+    margin-top: 20px;
+}
+
+.list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.delete-button {
+    background-color: #ff4d4d;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.delete-button:hover {
+    background-color: #cc0000;
+}

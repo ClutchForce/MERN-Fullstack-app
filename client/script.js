@@ -189,20 +189,67 @@ function fetchLists() {
 }
 
 // Update the displayList function
+// function displayList(listName, superheroes) {
+//     const listsContainer = document.getElementById('lists-container');
+//     const listDiv = document.createElement('div');
+//     listDiv.className = 'list';
+//     const listNameTextNode = document.createTextNode(listName);
+//     listDiv.appendChild(listNameTextNode);
+//     listsContainer.appendChild(listDiv);
+//     superheroes.forEach(superhero => {
+//         // const superheroDiv = document.createElement('div');
+//         // const superheroInfoTextNode = document.createTextNode(JSON.stringify(superhero, null, 2));
+//         // superheroDiv.appendChild(superheroInfoTextNode);
+//         // listDiv.appendChild(superheroDiv);
+//         const superheroDiv = document.createElement('div');
+//         superheroDiv.className = 'superhero';
+//         superheroDiv.innerHTML = `
+//             <h3>${superhero.name}</h3>
+//             <p>Gender: ${superhero.info.Gender}</p>
+//             <p>Race: ${superhero.info.Race}</p>
+//             <p>Publisher: ${superhero.info.Publisher}</p>
+//             <p>Powers: ${superhero.powers.join(', ')}</p>
+//         `;
+//         listDiv.appendChild(superheroDiv);
+//     });
+// }
+
+// Update the displayList function
 function displayList(listName, superheroes) {
     const listsContainer = document.getElementById('lists-container');
     const listDiv = document.createElement('div');
     listDiv.className = 'list';
+
+    const listHeader = document.createElement('div');  // Create a new div to hold the list name and delete button
+    listHeader.className = 'list-header';  // Add a class for styling (optional)
+
     const listNameTextNode = document.createTextNode(listName);
-    listDiv.appendChild(listNameTextNode);
+    listHeader.appendChild(listNameTextNode);  // Append the list name to the new div
+
+    const deleteButton = document.createElement('button');
+    const deleteButtonText = document.createTextNode('Delete');
+    deleteButton.appendChild(deleteButtonText);
+    deleteButton.className = 'delete-button';  // Add a class for styling (optional)
+    deleteButton.addEventListener('click', () => deleteList(listName));  // Attach event listener to the delete button
+
+    listHeader.appendChild(deleteButton);  // Append the delete button to the new div
+    listDiv.appendChild(listHeader);  // Append the new div to the list div
     listsContainer.appendChild(listDiv);
+
     superheroes.forEach(superhero => {
         const superheroDiv = document.createElement('div');
-        const superheroInfoTextNode = document.createTextNode(JSON.stringify(superhero, null, 2));
-        superheroDiv.appendChild(superheroInfoTextNode);
+        superheroDiv.className = 'superhero';
+        superheroDiv.innerHTML = `
+            <h3>${document.createTextNode(superhero.name).textContent}</h3>
+            <p>Gender: ${document.createTextNode(superhero.info.Gender).textContent}</p>
+            <p>Race: ${document.createTextNode(superhero.info.Race).textContent}</p>
+            <p>Publisher: ${document.createTextNode(superhero.info.Publisher).textContent}</p>
+            <p>Powers: ${superhero.powers.map(power => document.createTextNode(power).textContent).join(', ')}</p>
+        `;
         listDiv.appendChild(superheroDiv);
     });
 }
+
 
 // Function to toggle the sort order and refresh the displayed results
 function toggleSortOrder() {
@@ -240,8 +287,9 @@ function fetchListDetails(listName) {
 }
 
 
-// TODO: Maybe add a delete button next to each list name and set up an event listener to handle the deletion?
+//Add a function to delete a list
 function deleteList(listName) {
+    console.log('deleteList', listName);
     fetch(`/api/lists/${listName}`, {
         method: 'DELETE',
     })
@@ -251,6 +299,8 @@ function deleteList(listName) {
         fetchLists();
     })
     .catch(error => console.error('Error:', error));
+    //refresh the search results as well if needed
+    fetchLists();
 }
 
 // Add an event listener to the toggle-sort-order button
