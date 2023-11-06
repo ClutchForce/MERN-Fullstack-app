@@ -5,19 +5,29 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const fs = require('fs');
+const Storage = require('node-storage');
+ 
+// Initialize node-storage for list file
+const superheroListsStore = new Storage(path.join(__dirname, 'heroLists/superhero_lists.json'));
+
+//if the get returns is empty then put an empty object in the store
+if (superheroListsStore.get('lists') === null) {
+    superheroListsStore.put('lists', {}); // Initialize empty lists object
+}
 
 // Middleware to parse JSON bodies
 app.use(express.json({ encoding: 'utf8' }));
 
+
 // Function to read superhero information from file
 function readSuperheroInfo() {
-  const data = fs.readFileSync(path.join(__dirname,'../superhero_info.json'), 'utf-8');
+  const data = fs.readFileSync(path.join(__dirname,'heroData/superhero_info.json'), 'utf-8');
   return JSON.parse(data);
 }
 
 // Function to read superhero powers from file
 function readSuperheroPowers() {
-    const data = fs.readFileSync(path.join(__dirname,'../superhero_powers.json'), 'utf-8');
+    const data = fs.readFileSync(path.join(__dirname,'heroData/superhero_powers.json'), 'utf-8');
     return JSON.parse(data);
 }
 
@@ -166,121 +176,117 @@ app.get('/api/superheroes/:id/powers', (req, res) => {
 });
   
 // Endpoint to create a new superhero list
-// Updated POST /api/lists with validation
 app.post('/api/lists', [
-    check('listName').trim().escape().notEmpty().withMessage('List name is required'),
-  ], (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+  check('listName').trim().escape().notEmpty().withMessage('List name is required'),
+], (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+  }
 
-    const { listName } = req.body;
+  const { listName } = req.body;
+
+  if (!listName) {
+    return res.status(400).send('List name is required');
+  }
+
+  const listsData = superheroListsStore.get('lists') || {};
+
+  if (listsData[listName]) {
+    return res.status(409).send('List already exists');
+  }
+
+  listsData[listName] = [];
+  superheroListsStore.put('lists', listsData);
   
-    if (!listName) {
-      return res.status(400).send('listName is required');
-    }
-  
-    const listsPath = path.join(__dirname, '../superhero_lists.json');
-    const listsData = JSON.parse(fs.readFileSync(listsPath, 'utf8'));
-  
-    if (listsData[listName]) {
-      return res.status(409).send('List already exists');
-    }
-  
-    listsData[listName] = [];
-    fs.writeFileSync(listsPath, JSON.stringify(listsData, null, 2));
-    
-    res.status(201).send('List created');
+  res.status(201).send('List created');
 });
 
 // Endpoint to update a superhero list by name
-// Updated PUT /api/lists/:listName with validation
 app.put('/api/lists/:listName', [
-    check('listName').trim().escape().notEmpty().withMessage('List name is required'),
-    check('superheroIds').isArray(),
-  ], (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+  check('listName').trim().escape().notEmpty().withMessage('List name is required'),
+  check('superheroIds').isArray(),
+], (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
 
-    const { listName } = req.params;
-    const { superheroIds } = req.body;
+  const { listName } = req.params;
+  const { superheroIds } = req.body;
+
+  if (!Array.isArray(superheroIds)) {
+    return res.status(400).send('superheroIds must be an array');
+  }
+
+  const listsData = superheroListsStore.get('lists') || {};
+
+  listsData[listName] = superheroIds;
+  superheroListsStore.put('lists', listsData);
   
-    if (!Array.isArray(superheroIds)) {
-      return res.status(400).send('superheroIds must be an array');
-    }
-  
-    const listsPath = path.join(__dirname, '../superhero_lists.json');
-    const listsData = JSON.parse(fs.readFileSync(listsPath, 'utf8'));
-  
-    listsData[listName] = superheroIds;
-    fs.writeFileSync(listsPath, JSON.stringify(listsData, null, 2));
-    
-    res.send('List updated');
+  res.send('List updated');
 });
 
 // Endpoint to get all superhero lists
 app.get('/api/lists', (req, res) => {
-    const listsPath = path.join(__dirname, '../superhero_lists.json');
-    const listsData = JSON.parse(fs.readFileSync(listsPath, 'utf8'));
-    res.json(Object.keys(listsData));  // Send the names of all lists as an array
+  const listsData = superheroListsStore.get('lists') || {};
+  res.json(Object.keys(listsData));  // Send the names of all lists as an array
 });
 
 // Endpoint to get superhero IDs in a list by list name
 app.get('/api/lists/:listName', (req, res) => {
-    const { listName } = req.params;
-  
-    const listsPath = path.join(__dirname, '../superhero_lists.json');
-    const listsData = JSON.parse(fs.readFileSync(listsPath, 'utf8'));
-  
-    if (!listsData[listName]) {
-      return res.status(404).send('List not found');
-    }
-  
-    res.json(listsData[listName]);
+  const { listName } = req.params;
+
+  const listsData = superheroListsStore.get('lists') || {};
+
+  if (!listsData[listName]) {
+    return res.status(404).send('List not found');
+  }
+
+  res.json(listsData[listName]);
 });
   
 // Endpoint to delete a superhero list by name
 app.delete('/api/lists/:listName', (req, res) => {
-    const { listName } = req.params;
-  
-    const listsPath = path.join(__dirname, '../superhero_lists.json');
-    const listsData = JSON.parse(fs.readFileSync(listsPath, 'utf8'));
-  
-    if (!listsData[listName]) {
-      return res.status(404).send('List not found');
-    }
-  
-    delete listsData[listName];
-    fs.writeFileSync(listsPath, JSON.stringify(listsData, null, 2));
-  
-    res.send('List deleted');
+  const { listName } = req.params;
+
+  const listsData = superheroListsStore.get('lists') || {};
+
+  if (!listsData[listName]) {
+    return res.status(404).send('List not found');
+  }
+
+  delete listsData[listName];
+  superheroListsStore.put('lists', listsData);
+
+  res.send('List deleted');
 });
   
 // Endpoint to get details of superheroes in a list by list name
 app.get('/api/lists/:listName/details', (req, res) => {
-    const { listName } = req.params;
+  const { listName } = req.params;
+
+  const listsData = superheroListsStore.get('lists') || {};
+
+  if (!listsData[listName]) {
+      return res.status(404).send('List not found');
+  }
+
+  const superheroes = readSuperheroInfo();
   
-    const listsPath = path.join(__dirname, '../superhero_lists.json');
-    const listsData = JSON.parse(fs.readFileSync(listsPath, 'utf8'));
-  
-    if (!listsData[listName]) {
-        return res.status(404).send('List not found');
-    }
-  
-    const superheroes = readSuperheroInfo();
-    
-    const listDetails = listsData[listName].map(id => {
-        const superhero = superheroes.find(hero => hero.id === id);
-        const powersArray = getSuperheroPowersById(id);
-        return {
-            name: superhero.name || 'no-name',
-            info: superhero,
-            powers: powersArray || []  // will return empty array if no powers
-        };
-    });
-  
-    res.json(listDetails);
+  const listDetails = listsData[listName].map(id => {
+      const superhero = superheroes.find(hero => hero.id === parseInt(id));
+      if (!superhero) {
+          return { id: id, name: 'no-name', info: {}, powers: [] };
+      }
+      const powersArray = getSuperheroPowersById(parseInt(id));
+      return {
+          id: id,
+          name: superhero.name,
+          info: superhero,
+          powers: powersArray
+      };
+  });
+
+  res.json(listDetails);
 });

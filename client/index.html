@@ -10,18 +10,16 @@
 <body>
     <h1>Superheros</h1>
     <!-- Sorting Controls -->
-    <form id="search-form">
-        <div id="sorting-controls">
-            <label for="sort-field">Sort By:</label>
-            <select id="sort-field" name="sort-field">
-                <option value="name">Name</option>
-                <option value="Race">Race</option>
-                <option value="Publisher">Publisher</option>
-                <option value="powers">Number of Powers</option>
-            </select>
-            <button id="toggle-sort-order" type="button">Toggle Ascending/Descending</button>
-        </div>
-    </form>
+    <div id="sorting-controls">
+        <label for="sort-field">Sort By:</label>
+        <select id="sort-field" name="sort-field">
+            <option value="name">Name</option>
+            <option value="Race">Race</option>
+            <option value="Publisher">Publisher</option>
+            <option value="powers">Number of Powers</option>
+        </select>
+        <button id="toggle-sort-order" type="button">Toggle Ascending/Descending</button>
+    </div>
     <!-- Search Form -->
     <form id="search-form">
         <label for="search-field">Search Field:</label>
@@ -36,7 +34,7 @@
         </div>
         <label for="search-pattern">Search Pattern:</label>
         <div id="search-pattern-container">
-            <input type="text" id="search-pattern" name="search-pattern" required>
+            <input type="text" id="search-pattern" name="search-pattern" autocomplete="off" required>
             <div id="pattern-dropdown" class="dropdown-content"></div>
         </div>
         <label for="num-results">Number of Results:</label>

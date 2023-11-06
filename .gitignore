@@ -1,10 +1,11 @@
 # Logs and databases #
 ######################
-superhero_info.json
-superhero_powers.json
-superhero_lists.json
 *.log
+heroData/
+heroLists/
 
 # Node.js #
 ##########
 node_modules/
+
+
