@@ -66,7 +66,7 @@ function handleSearchFormSubmit(event) {
         url.searchParams.append('n', numResults);
     }
     //Debugging
-    console.log(url);
+    //console.log(url);
 
     // Send the search request using the fetch API
     fetch(url)
@@ -112,7 +112,7 @@ async function getSuperheroPowers(superheroId) {
 // Define a function to get superhero information
 async function getSuperheroInfo(superheroId) {
     // Send a request to get the superhero information
-    console.log('getSuperheroInfo', superheroId);
+    //console.log('getSuperheroInfo', superheroId);
     const response = await fetch(`/api/superheroes/${superheroId}`);
 
     if (!response.ok) {
