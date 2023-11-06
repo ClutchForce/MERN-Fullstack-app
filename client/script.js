@@ -1,8 +1,26 @@
 let ascendingOrder = true;  // A variable to keep track of the current sort order
 
+function sanitizeInput(input) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#x27;',
+        "/": '&#x2F;',
+    };
+    const reg = /[&<>"'/]/ig;
+    return input.replace(reg, (match)=>(map[match]));
+}
+
+// Function to validate superhero IDs
+function validateSuperheroIds(ids) {
+    return ids.map(id => parseInt(id.trim())).filter(id => !isNaN(id));
+}
+
 // Function to sort the superhero data based on a specified field and order
 function sortSuperheroes(superheroes, field, sortType) {
-    console.log('sortSuperheroes', superheroes, field);
+    //console.log('sortSuperheroes', superheroes, field);
     return superheroes.slice().sort((a, b) => {
         let comparison = 0;
         if (field === 'powers') {
@@ -25,14 +43,17 @@ function handleSearchFormSubmit(event) {
     event.preventDefault();
 
     // Get the form data
-    const searchField = document.getElementById('search-field').value;
-    const searchPattern = document.getElementById('search-pattern').value;
+    //fix sanitize input
+    const searchField = sanitizeInput(document.getElementById('search-field').value);
+    const searchPattern = sanitizeInput(document.getElementById('search-pattern').value);
+
     const numResults = document.getElementById('num-results').value || undefined;  // If no value is provided, set it to undefined
 
+    
     //check to see if search pattern and field is empty and return appropriate error message if so
     if (!searchPattern || !searchField) {
         const resultsContainer = document.getElementById('results-container');
-        resultsContainer.innerHTML = '';
+        resultsContainer.textContent = '';
         resultsContainer.textContent = 'Both search pattern and field are required.';
         return;
     }
@@ -91,6 +112,7 @@ async function getSuperheroPowers(superheroId) {
 // Define a function to get superhero information
 async function getSuperheroInfo(superheroId) {
     // Send a request to get the superhero information
+    console.log('getSuperheroInfo', superheroId);
     const response = await fetch(`/api/superheroes/${superheroId}`);
 
     if (!response.ok) {
@@ -106,9 +128,9 @@ async function getSuperheroInfo(superheroId) {
 
 // Update the displaySearchResults function
 function displaySearchResults(data) {
-    console.log('displaySearchResults', data);
+    //console.log('displaySearchResults', data);
     const resultsContainer = document.getElementById('results-container');
-    resultsContainer.innerHTML = '';  // Clear any previous search results
+    resultsContainer.textContent = '';  // Clear any previous search results
     if (data.length === 0) {
         resultsContainer.textContent = 'No results found.';
         return;
@@ -159,7 +181,8 @@ function displaySearchResults(data) {
 function handleListFormSubmit(event) {
     event.preventDefault();
     const listName = document.getElementById('list-name').value;
-    const superheroIds = document.getElementById('superhero-ids').value.split(',').map(id => parseInt(id.trim()));
+    //added sanitize input
+    const superheroIds = validateSuperheroIds(document.getElementById('superhero-ids').value.split(','));
 
     // Function to compare two arrays of IDs to see if they are different
     function arraysDiffer(a, b) {
@@ -238,7 +261,7 @@ function fetchLists() {
     .then(response => response.json())
     .then(data => {
         const listsContainer = document.getElementById('lists-container');
-        listsContainer.innerHTML = '';  // Clear the existing content
+        listsContainer.textContent = '';  // Clear the existing content
         data.forEach(listName => {
             fetchListDetails(listName).then(superheroes => {
                 const sortField = document.getElementById('sort-field').value;
@@ -253,44 +276,55 @@ function fetchLists() {
 }
 
 // Update the displayList function
+// Added sanitizion by removing innerHTML and using textContent
 function displayList(listName, superheroes) {
     const listsContainer = document.getElementById('lists-container');
     const listDiv = document.createElement('div');
     listDiv.className = 'list';
 
-    const listHeader = document.createElement('div');  // Create a new div to hold the list name and delete button
-    listHeader.className = 'list-header';  // Add a class for styling (optional)
+    const listHeader = document.createElement('div');
+    listHeader.className = 'list-header';
 
     const listNameTextNode = document.createTextNode(listName);
-    listHeader.appendChild(listNameTextNode);  // Append the list name to the new div
+    listHeader.appendChild(listNameTextNode);
 
     const deleteButton = document.createElement('button');
-    const deleteButtonText = document.createTextNode('Delete');
-    deleteButton.appendChild(deleteButtonText);
-    deleteButton.className = 'delete-button';  // Add a class for styling (optional)
-    deleteButton.addEventListener('click', () => deleteList(listName));  // Attach event listener to the delete button
+    deleteButton.textContent = 'Delete';
+    deleteButton.className = 'delete-button';
+    deleteButton.addEventListener('click', () => deleteList(listName));
 
-    listHeader.appendChild(deleteButton);  // Append the delete button to the new div
-    listDiv.appendChild(listHeader);  // Append the new div to the list div
+    listHeader.appendChild(deleteButton);
+    listDiv.appendChild(listHeader);
     listsContainer.appendChild(listDiv);
 
     superheroes.forEach(superhero => {
         const superheroDiv = document.createElement('div');
         superheroDiv.className = 'superhero';
-        superheroDiv.innerHTML = `
-            <h3>${document.createTextNode(superhero.name).textContent}</h3>
-            <p>ID: ${document.createTextNode(superhero.info.id).textContent}</p>
-            <p>Gender: ${document.createTextNode(superhero.info.Gender).textContent}</p>
-            <p>Eye Color: ${document.createTextNode(superhero.info['Eye color']).textContent}</p>
-            <p>Race: ${document.createTextNode(superhero.info.Race).textContent}</p>
-            <p>Hair Color: ${document.createTextNode(superhero.info['Hair color']).textContent}</p>
-            <p>Height: ${document.createTextNode(superhero.info.Height).textContent}</p>
-            <p>Publisher: ${document.createTextNode(superhero.info.Publisher).textContent}</p>
-            <p>Skin color: ${document.createTextNode(superhero.info['Skin color']).textContent}</p>
-            <p>Alignment: ${document.createTextNode(superhero.info.Alignment).textContent}</p>
-            <p>Weight: ${document.createTextNode(superhero.info.Weight).textContent}</p>
-            <p>Powers: ${superhero.powers.map(power => document.createTextNode(power).textContent).join(', ')}</p>
-        `;
+
+        const h3 = document.createElement('h3');
+        h3.textContent = superhero.name;
+        superheroDiv.appendChild(h3);
+
+        const properties = [
+            { label: 'ID', value: superhero.info.id },
+            { label: 'Gender', value: superhero.info.Gender },
+            { label: 'Eye Color', value: superhero.info['Eye color'] },
+            { label: 'Race', value: superhero.info.Race },
+            { label: 'Hair Color', value: superhero.info['Hair color'] },
+            { label: 'Height', value: superhero.info.Height },
+            { label: 'Publisher', value: superhero.info.Publisher },
+            { label: 'Skin color', value: superhero.info['Skin color'] },
+            { label: 'Alignment', value: superhero.info.Alignment },
+            { label: 'Weight', value: superhero.info.Weight },
+            { label: 'Powers', value: superhero.powers.join(', ') },
+        ];
+
+        properties.forEach(prop => {
+            const p = document.createElement('p');
+            p.textContent = `${prop.label}: ${prop.value}`;
+            superheroDiv.appendChild(p);
+        });
+
         listDiv.appendChild(superheroDiv);
     });
 }
@@ -333,7 +367,7 @@ function fetchListDetails(listName) {
 
 //Add a function to delete a list
 function deleteList(listName) {
-    console.log('deleteList', listName);
+    //console.log('deleteList', listName);
     fetch(`/api/lists/${listName}`, {
         method: 'DELETE',
     })
@@ -357,7 +391,7 @@ function fetchListNames() {
 // Function to fetch the superhero IDs in a list by list name
 function populateListNameDropdown(listNames) {
     const listNameDropdown = document.getElementById('list-name-dropdown');
-    listNameDropdown.innerHTML = '';  // Clear existing items
+    listNameDropdown.textContent = '';  // Clear existing items
     listNames.forEach(listName => {
         const dropdownItem = document.createElement('div');
         dropdownItem.className = 'dropdown-item';
@@ -393,6 +427,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     const searchDropdown = document.getElementById('search-dropdown');
     const dropdownItems = document.querySelectorAll('.dropdown-item');
 
+
     // Show dropdown when input is clicked
     searchField.addEventListener('click', () => {
         searchDropdown.style.display = 'block';
@@ -418,7 +453,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
     // Function to populate the pattern dropdown
     function populatePatternDropdown(publishers) {
-        patternDropdown.innerHTML = '';  // Clear existing items
+        patternDropdown.textContent = '';  // Clear existing items
         publishers.forEach(publisher => {
             if (publisher) {  // Ignore empty strings
                 const dropdownItem = document.createElement('div');
@@ -530,3 +565,4 @@ fetchLists();
 // Add an event listener to the search form
 const searchForm = document.getElementById('search-form');
 searchForm.addEventListener('submit', handleSearchFormSubmit);
+

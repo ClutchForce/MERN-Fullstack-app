@@ -102,6 +102,17 @@ function searchSuperheroesByPower(pattern, n){
     return filteredHeroes.map(hero => hero.id);
 }
 
+//id validation function
+function isValidId(id) {
+  const num = parseInt(id, 10);
+  return !isNaN(num) && num >= 0;
+}
+
+//validation function Pattern Sanitization for RegExp
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 // Middleware to serve static files from client directory
 app.use(express.static(path.join(__dirname, '../client')));
 
@@ -129,11 +140,13 @@ app.get('/api/publishers', (req, res) => {
   
 // Endpoint to search superheroes by a specified field and pattern
 app.get('/api/superheroes/search', (req, res) => {
-    const { field, pattern, n } = req.query;
+    let { field, pattern, n } = req.query;
     
     if (!field || !pattern) {
       return res.status(400).send('Both field and pattern are required');
     }
+    pattern = escapeRegExp(pattern); // Sanitize the pattern
+
     const superheroIds = searchSuperheroes(field, pattern, n);
     
     if (superheroIds.length === 0) {
@@ -145,8 +158,12 @@ app.get('/api/superheroes/search', (req, res) => {
 
 // Endpoint to get superhero data by ID
 app.get('/api/superheroes/:id', (req, res) => {
-    const superhero = getSuperheroById(req.params.id);
-    
+    if (!isValidId(req.params.id)) {
+        return res.status(400).send('Invalid ID format');
+    }
+
+    const superhero = getSuperheroById(req.params.id);  
+
     if (!superhero) {
       return res.status(404).send('Superhero not found');
     }
