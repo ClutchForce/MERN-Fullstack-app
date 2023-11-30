@@ -1,19 +1,25 @@
-import React from 'react'
-import { BrowserRouter, Route } from 'react-router-dom'
-import Login from './pages/Login'
-import Register from './pages/Register'
-import Dashboard from './pages/Dashboard'
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import "./App.css";
+import { Navbar } from "./components/navbar";
+import { Auth } from "./pages/auth";
+import { CreateHeroList } from "./pages/create-herolist";
+import { Home } from "./pages/home";
+import { SavedHeroLists } from "./pages/saved-herolists";
 
-const App = () => {
-	return (
-		<div>
-			<BrowserRouter>
-				<Route path="/login" exact component={Login} />
-				<Route path="/register" exact component={Register} />
-				<Route path="/dashboard" exact component={Dashboard} />
-			</BrowserRouter>
-		</div>
-	)
+function App() {
+  return (
+    <div className="App">
+      <Router>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/create-herolist" element={<CreateHeroList />} />
+          <Route path="/saved-herolists" element={<SavedHeroLists />} />
+          <Route path="/auth" element={<Auth />} />
+        </Routes>
+      </Router>
+    </div>
+  );
 }
 
-export default App
+export default App;
