@@ -8,10 +8,10 @@ export const SuperheroProvider = ({ children }) => {
   const [sortField, setSortField] = useState('name');
   const [isAscending, setIsAscending] = useState(true);
 
-  const searchSuperheroes = async (field, pattern) => {
+  const searchSuperheroes = async (searchParams) => {
     try {
       const response = await axios.get(`http://localhost:3001/public/superheroes/search`, {
-        params: { field, pattern }
+        params: searchParams
       });
       setSearchResults(response.data);
     } catch (error) {
@@ -24,11 +24,6 @@ export const SuperheroProvider = ({ children }) => {
     // You may want to re-fetch or re-sort the search results here
   };
 
-//   return (
-//     <SuperheroContext.Provider value={{ searchResults, setSortField, toggleSortOrder, searchSuperheroes }}>
-//       {children}
-//     </SuperheroContext.Provider>
-//   );
   return (
     <SuperheroContext.Provider value={{ searchResults, searchSuperheroes }}>
       {children}
