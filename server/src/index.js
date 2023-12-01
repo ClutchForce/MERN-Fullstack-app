@@ -3,6 +3,8 @@ import cors from "cors";
 import mongoose from "mongoose";
 import { userRouter } from "./routes/user.js";
 import { herolistsRouter } from "./routes/herolists.js";
+import { heroinfoRouter } from "./routes/heroinfo.js"; // Import the superhero info router
+
 
 const app = express();
 
@@ -11,6 +13,8 @@ app.use(cors());
 
 app.use("/auth", userRouter);
 app.use("/herolists", herolistsRouter);
+app.use("/public/superheroes", heroinfoRouter); // Use the superhero info router
+
 
 mongoose.connect(
   "mongodb://localhost:27017/se3316Lab4",
