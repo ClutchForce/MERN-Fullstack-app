@@ -30,6 +30,7 @@ const Login = () => {
       });
 
       setCookies("access_token", result.data.token);
+
       window.localStorage.setItem("userID", result.data.userID);
       navigate("/");
     } catch (error) {
@@ -45,7 +46,7 @@ const Login = () => {
           <label htmlFor="username">Username:</label>
           <input
             type="text"
-            id="username"
+            id="login-username"
             value={username}
             onChange={(event) => setUsername(event.target.value)}
           />
@@ -54,7 +55,7 @@ const Login = () => {
           <label htmlFor="password">Password:</label>
           <input
             type="password"
-            id="password"
+            id="login-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
           />
@@ -95,7 +96,7 @@ const Register = () => {
           <label htmlFor="username">Username:</label>
           <input
             type="text"
-            id="username"
+            id="register-username"
             value={username}
             onChange={(event) => setUsername(event.target.value)}
           />
@@ -113,7 +114,7 @@ const Register = () => {
           <label htmlFor="password">Password:</label>
           <input
             type="password"
-            id="password"
+            id="register-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
           />

@@ -18,7 +18,7 @@ export const Navbar = () => {
       {isAuthenticated && (
         <>
           <Link to="/create-herolist">Create HeroList</Link>
-          <Link to="/saved-herolists">Saved HeroLists</Link>
+          <Link to="/saved-herolists">My HeroLists</Link>
         </>
       )}
       {!isAuthenticated ? (

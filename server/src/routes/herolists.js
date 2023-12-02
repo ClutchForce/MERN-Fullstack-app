@@ -56,21 +56,49 @@ router.post("/", verifyToken, async (req, res) => {
   }
 });
 
+// Get the herolists of a given user by user id
+router.get("/savedHeroLists/:userId", async (req, res) => {
+  try {
+    const result = await HeroListsModel.find({ userOwner: req.params.userId });
+    console.log("/savedHeroLists/:userId",result);
+    res.status(200).json(result);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
 // Get the first 10 public herolists by date modified
 router.get("/public", async (req, res) => {
-  console.log("herolists/public");
   try {
     const result = await HeroListsModel.find({ isPublic: true })
       .sort({ lastModified: -1 })
       .limit(10);
     //Debug log with apis name and result
-    console.log("herolists/public", result);
+    //console.log("herolists/public", result);
     res.status(200).json(result);
   } catch (err) {
     console.log("herolists/public ERROR",err);
     res.status(500).json(err);
   }
 });
+
+// // Get saved herolists
+// router.get("/savedHeroLists/:userId", async (req, res) => {
+//   try {
+//     const user = await UserModel.findById(req.params.userId);
+//     const savedHeroLists = await HeroListsModel.find({
+//       _id: { $in: user.savedHeroLists },
+//     });
+
+//     console.log("hihi",savedHeroLists);
+//     res.status(201).json({ savedHeroLists });
+//   } catch (err) {
+//     console.log(err);
+//     res.status(500).json(err);
+//   }
+// });
+
+
 
 // Get a herolist by ID
 router.get("/:herolistId", async (req, res) => {
@@ -106,21 +134,6 @@ router.get("/savedHeroLists/ids/:userId", async (req, res) => {
   }
 });
 
-// Get saved herolists
-router.get("/savedHeroLists/:userId", async (req, res) => {
-  try {
-    const user = await UserModel.findById(req.params.userId);
-    const savedHeroLists = await HeroListsModel.find({
-      _id: { $in: user.savedHeroLists },
-    });
-
-    console.log("hihi",savedHeroLists);
-    res.status(201).json({ savedHeroLists });
-  } catch (err) {
-    console.log(err);
-    res.status(500).json(err);
-  }
-});
 
 
 

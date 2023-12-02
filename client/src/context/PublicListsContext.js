@@ -1,5 +1,4 @@
-
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, useCallback } from 'react';
 import axios from 'axios';
 
 export const PublicListsContext = createContext();
@@ -8,16 +7,14 @@ export const PublicListsProvider = ({ children }) => {
   const [publicListResults, setPublicListsResults] = useState([]);
 
 
-  const searchPublicLists = async () => {
+  const searchPublicLists = useCallback(async () => {
     try {
-      // Update API call to include sorting and filtering logic
-      const response = await axios.get(`http://localhost:3001/api/open/herolists/public`, {});
-      console.log('response.data:', response.data);
+      const response = await axios.get(`http://localhost:3001/api/open/herolists/public`);
       setPublicListsResults(response.data);
     } catch (error) {
       console.error('Error fetching herolists:', error);
     }
-  };
+  }, []); // Empty dependency array ensures this is created once
 
 //   searchPublicLists();
 //   console.log('publicListResults:', publicListResults);
