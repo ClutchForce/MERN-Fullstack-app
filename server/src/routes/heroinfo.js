@@ -3,36 +3,6 @@ import { Superhero, SuperheroPower } from "../models/HeroInfo.js"; // Adjust imp
 
 const router = express.Router();
 
-// router.get('/search', async (req, res) => {
-//     const { field, pattern } = req.query;
-  
-//     try {
-//       if (field === 'powers') {
-//         console.log('Searching by powers');
-//         // Search in SuperheroPower collection
-
-//         const powerQuery = {};
-//         powerQuery[pattern] = true; // Query for the specific power
-//         const powers = await SuperheroPower.find(powerQuery);
-
-//         // Extract hero names
-//         const heroNames = powers.map(power => power.hero_names);
-
-//         // Find superheroes with these names
-//         const superheroes = await Superhero.find({ name: { $in: heroNames } });
-//         res.json(superheroes);
-//       } else {
-//         // Regular search in Superhero collection
-//         const query = {};
-//         query[field] = new RegExp(pattern, 'i');
-//         const superheroes = await Superhero.find(query);
-//         res.json(superheroes);
-//       }
-//     } catch (err) {
-//       res.status(500).send('Server error');
-//     }
-//   });
-
 router.get('/search', async (req, res) => {
   const { name, gender, race, publisher, powers } = req.query;
 

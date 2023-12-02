@@ -12,8 +12,8 @@ app.use(express.json());
 app.use(cors());
 
 app.use("/auth", userRouter);
-app.use("/herolists", herolistsRouter);
-app.use("/public/superheroes", heroinfoRouter); // Use the superhero info router
+app.use("/api/open/herolists", herolistsRouter);
+app.use("/api/open/superheroes", heroinfoRouter); // Use the superhero info router
 
 
 mongoose.connect(

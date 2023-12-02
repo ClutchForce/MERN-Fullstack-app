@@ -17,15 +17,20 @@ router.get("/", async (req, res) => {
 
 // Create a new herolist
 router.post("/", verifyToken, async (req, res) => {
+  const user = await UserModel.findById(req.body.userOwner);
   const herolist = new HeroListsModel({
     _id: new mongoose.Types.ObjectId(),
     name: req.body.name,
-    image: req.body.image,
-    ingredients: req.body.ingredients,
-    instructions: req.body.instructions,
-    imageUrl: req.body.imageUrl,
-    cookingTime: req.body.cookingTime,
+    description: req.body.description,
+    heronamelist: req.body.heronamelist,
+    isPublic: req.body.isPublic,
+    lastModified: req.body.lastModified,
+    averageRating: req.body.averageRating,
+    comments: req.body.comments,
+    ratings: req.body.ratings,
+    nickname: user.nickname,
     userOwner: req.body.userOwner,
+
   });
   console.log(herolist);
 
@@ -34,14 +39,35 @@ router.post("/", verifyToken, async (req, res) => {
     res.status(201).json({
       createdHeroList: {
         name: result.name,
-        image: result.image,
-        ingredients: result.ingredients,
-        instructions: result.instructions,
+        description: result.description,
+        heronamelist: result.heronamelist,
+        isPublic: result.isPublic,
+        lastModified: result.lastModified,
+        averageRating: result.averageRating,
+        comments: result.comments,
+        ratings: result.ratings,
+        nickname: result.nickname,
         _id: result._id,
       },
     });
   } catch (err) {
-    // console.log(err);
+    console.log(err);
+    res.status(500).json(err);
+  }
+});
+
+// Get the first 10 public herolists by date modified
+router.get("/public", async (req, res) => {
+  console.log("herolists/public");
+  try {
+    const result = await HeroListsModel.find({ isPublic: true })
+      .sort({ lastModified: -1 })
+      .limit(10);
+    //Debug log with apis name and result
+    console.log("herolists/public", result);
+    res.status(200).json(result);
+  } catch (err) {
+    console.log("herolists/public ERROR",err);
     res.status(500).json(err);
   }
 });
@@ -88,7 +114,7 @@ router.get("/savedHeroLists/:userId", async (req, res) => {
       _id: { $in: user.savedHeroLists },
     });
 
-    console.log(savedHeroLists);
+    console.log("hihi",savedHeroLists);
     res.status(201).json({ savedHeroLists });
   } catch (err) {
     console.log(err);
@@ -96,4 +122,8 @@ router.get("/savedHeroLists/:userId", async (req, res) => {
   }
 });
 
+
+
+
 export { router as herolistsRouter };
+

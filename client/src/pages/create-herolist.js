@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useGetUserID } from "../hooks/useGetUserID";
+import { useGetUserID } from "../hooks/useGetUserInfo";
 import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 
@@ -10,37 +10,44 @@ export const CreateHeroList = () => {
   const [herolist, setHeroList] = useState({
     name: "",
     description: "",
-    ingredients: [],
-    instructions: "",
-    imageUrl: "",
-    cookingTime: 0,
+    heronamelist: [],
+    isPublic: false,
+    //lastModified date
+    lastModified: new Date(),
+    averageRating: 0,
+    comments: [],
+    ratings: [],
+    nickname: "",
     userOwner: userID,
   });
 
   const navigate = useNavigate();
 
   const handleChange = (event) => {
-    const { name, value } = event.target;
-    setHeroList({ ...herolist, [name]: value });
+    const { name, value, type, checked } = event.target;
+    setHeroList({
+      ...herolist,
+      [name]: type === "checkbox" ? checked : value,
+    });
   };
 
-  const handleIngredientChange = (event, index) => {
+  const handleHeroNameChange = (event, index) => {
     const { value } = event.target;
-    const ingredients = [...herolist.ingredients];
-    ingredients[index] = value;
-    setHeroList({ ...herolist, ingredients });
+    const heronamelist = [...herolist.heronamelist];
+    heronamelist[index] = value;
+    setHeroList({ ...herolist, heronamelist });
   };
 
-  const handleAddIngredient = () => {
-    const ingredients = [...herolist.ingredients, ""];
-    setHeroList({ ...herolist, ingredients });
+  const handleAddHeroName = () => {
+    const heronamelist = [...herolist.heronamelist, ""];
+    setHeroList({ ...herolist, heronamelist });
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
       await axios.post(
-        "http://localhost:3001/herolists",
+        "http://localhost:3001/api/open/herolists",
         { ...herolist },
         {
           headers: { authorization: cookies.access_token },
@@ -73,42 +80,27 @@ export const CreateHeroList = () => {
           value={herolist.description}
           onChange={handleChange}
         ></textarea>
-        <label htmlFor="ingredients">Ingredients</label>
-        {herolist.ingredients.map((ingredient, index) => (
+        <label htmlFor="isPublic">Public List</label>
+        <input
+          type="checkbox"
+          id="isPublic"
+          name="isPublic"
+          checked={herolist.isPublic}
+          onChange={handleChange}
+        />
+        <label htmlFor="heronamelist">Hero Name List</label>
+        {herolist.heronamelist.map((hero, index) => (
           <input
             key={index}
             type="text"
-            name="ingredients"
-            value={ingredient}
-            onChange={(event) => handleIngredientChange(event, index)}
+            name="heronamelist"
+            value={hero}
+            onChange={(event) => handleHeroNameChange(event, index)}
           />
         ))}
-        <button type="button" onClick={handleAddIngredient}>
-          Add Ingredient
+        <button type="button" onClick={handleAddHeroName}>
+          Add Hero
         </button>
-        <label htmlFor="instructions">Instructions</label>
-        <textarea
-          id="instructions"
-          name="instructions"
-          value={herolist.instructions}
-          onChange={handleChange}
-        ></textarea>
-        <label htmlFor="imageUrl">Image URL</label>
-        <input
-          type="text"
-          id="imageUrl"
-          name="imageUrl"
-          value={herolist.imageUrl}
-          onChange={handleChange}
-        />
-        <label htmlFor="cookingTime">Cooking Time (minutes)</label>
-        <input
-          type="number"
-          id="cookingTime"
-          name="cookingTime"
-          value={herolist.cookingTime}
-          onChange={handleChange}
-        />
         <button type="submit">Create HeroList</button>
       </form>
     </div>

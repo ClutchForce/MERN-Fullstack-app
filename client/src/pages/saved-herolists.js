@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useGetUserID } from "../hooks/useGetUserID";
+import { useGetUserID } from "../hooks/useGetUserInfo";
 import axios from "axios";
 
 export const SavedHeroLists = () => {
@@ -10,7 +10,7 @@ export const SavedHeroLists = () => {
     const fetchSavedHeroLists = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3001/herolists/savedHeroLists/${userID}`
+          `http://localhost:3001/api/open/herolists/savedHeroLists/${userID}`
         );
         setSavedHeroLists(response.data.savedHeroLists);
       } catch (err) {
@@ -30,8 +30,10 @@ export const SavedHeroLists = () => {
               <h2>{herolist.name}</h2>
             </div>
             <p>{herolist.description}</p>
-            <img src={herolist.imageUrl} alt={herolist.name} />
-            <p>Cooking Time: {herolist.cookingTime} minutes</p>
+            {/* Refactor */}
+            {/* <img src={herolist.imageUrl} alt={herolist.name} /> */}
+            {/* Refactor */}
+            {/* <p>Cooking Time: {herolist.cookingTime} minutes</p> */}
           </li>
         ))}
       </ul>

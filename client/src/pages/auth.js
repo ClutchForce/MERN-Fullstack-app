@@ -67,6 +67,7 @@ const Login = () => {
 
 const Register = () => {
   const [username, setUsername] = useState("");
+  const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");
 
   const [_, setCookies] = useCookies(["access_token"]);
@@ -77,6 +78,7 @@ const Register = () => {
     try {
       await axios.post("http://localhost:3001/auth/register", {
         username,
+        nickname,
         password,
       });
       alert("Registration Completed! Now login.");
@@ -96,6 +98,15 @@ const Register = () => {
             id="username"
             value={username}
             onChange={(event) => setUsername(event.target.value)}
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="nickname">Nickname:</label>
+          <input
+            type="text"
+            id="nickname"
+            value={nickname}
+            onChange={(event) => setNickname(event.target.value)}
           />
         </div>
         <div className="form-group">

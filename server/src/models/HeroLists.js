@@ -1,28 +1,64 @@
 import mongoose from "mongoose";
 
+//List needs to inclue 
+//-----------------------
+//name of list REQUIRED
+//nickname of user [auto generated]
+//discription NON-REQUIRED
+//list of superheroes (accepts id string OR name) REQUIRED
+//Last modification date [auto generated]
+//isPublic Required [auto set to private]
+//number of heroes in list [auto generated]
+//average rating [auto generated]
+//list of comments [empty untill filled]
+//list of ratings [empty untill filled]
+
 const herolistSchema = mongoose.Schema({
   name: {
     type: String,
     required: true,
   },
-  ingredients: [
+  description: {
+    type: String,
+    required: false,
+  },
+  heronamelist: [
     {
       type: String,
       required: true,
     },
   ],
-  instructions: {
-    type: String,
+  isPublic: {
+    type: Boolean,
     required: true,
   },
-
-  imageUrl: {
-    type: String,
-    required: true,
+  lastModified: {
+    type: Date,
+    default: Date.now,
   },
-  cookingTime: {
+  averageRating: {
     type: Number,
+    default: 0,
+  },
+  comments: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Review',
+  }],
+  ratings: [{
+    rating: {
+      type: Number,
+      required: true,
+    },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    }
+  }],
+  nickname: {
+    type: String,
     required: true,
+    // This will be populated from User model on retrieval
   },
   userOwner: {
     type: mongoose.Schema.Types.ObjectId,
