@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { reviewSchema } from "./Review.js"; 
 
 //List needs to inclue 
 //-----------------------
@@ -40,21 +41,7 @@ const herolistSchema = mongoose.Schema({
     type: Number,
     default: 0,
   },
-  comments: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Review',
-  }],
-  ratings: [{
-    rating: {
-      type: Number,
-      required: true,
-    },
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    }
-  }],
+  reviews: [reviewSchema],
   nickname: {
     type: String,
     required: true,

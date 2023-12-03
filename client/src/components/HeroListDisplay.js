@@ -152,6 +152,7 @@ export const HeroListDisplay = () => {
                 {/* description of hero list if any  */}
                 <p>Description: {herolist.description}</p>
                 {/* Display a ul of all the hero names in heronamelist and an show more information toggle under the hero name which will add the hero detail to the il until the button is toggled again. */}
+                <p>Heros in List: </p>
                 <ul>
                   {herolist.heronamelist.map((heroName) => (
                       <li key={heroName}>
@@ -173,7 +174,7 @@ export const HeroListDisplay = () => {
                     ))}
                 </ul>
                 <p>Reviews: </p>
-                {/* TODO: add functionality to display comments */}
+                {/* functionality to display comments */}
                 <ul>
                   {herolist.reviews.map((review) => (
                     <li key={review._id}>

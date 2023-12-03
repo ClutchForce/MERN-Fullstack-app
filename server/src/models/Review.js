@@ -1,14 +1,9 @@
 import mongoose from "mongoose";
 
-const reviewSchema = mongoose.Schema({
+export const reviewSchema = mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-    required: true,
-  },
-  herolistId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "HeroLists",
     required: true,
   },
   comment: String,
@@ -16,6 +11,7 @@ const reviewSchema = mongoose.Schema({
     type: Number,
     required: true,
   },
+  nickname: String, // Add nickname here
   createdAt: {
     type: Date,
     default: Date.now,

@@ -84,11 +84,16 @@ router.get("/public", async (req, res) => {
   }
 });
 
-// Delete a herolist by ID of list 
 router.delete("/deleteSavedList/:herolistId", async (req, res) => {
   try {
-    console.log("deleteSavedList/:herolistId", req.params.herolistId);
-    const result = await HeroListsModel.findByIdAndDelete(req.params.herolistId);
+    const herolistId = req.params.herolistId;
+
+    // Delete the hero list
+    const result = await HeroListsModel.findByIdAndDelete(herolistId);
+
+    // Delete associated reviews
+    await ReviewModel.deleteMany({ herolistId: herolistId });
+
     res.status(200).json(result);
   } catch (err) {
     console.log("deleteSavedList/:herolistId ERROR", err);
@@ -96,44 +101,45 @@ router.delete("/deleteSavedList/:herolistId", async (req, res) => {
   }
 });
 
+
 router.post("/review", async (req, res) => {
   try {
-    const {userID, herolistId, comment, ratingNumber } = req.body;
-    // verifyToken middleware does not add userId to req  we need to manually get the logged in user
+    const { userID, herolistId, comment, ratingNumber } = req.body;
+    const user = await UserModel.findById(userID);
+    const herolist = await HeroListsModel.findById(herolistId);
 
+    // Create a new review for embedding
+    const embeddedReview = {
+      userId: userID,
+      comment: comment,
+      rating: ratingNumber,
+      nickname: user.nickname,
+      createdAt: new Date()
+    };
 
-    const date = new Date();
-    //rating is manadatory 
-
-    //console.log("/api/secure/herolists/review userId, herolistId, comment, rating, createdAt: ",userID, herolistId, comment, ratingNumber, date);
-
+    // Save the review in the separate Review collection
     const newReview = new ReviewModel({
       userId: userID,
       herolistId,
       comment,
       rating: ratingNumber,
-      createdAt: date,
+      createdAt: new Date(),
+      hidden: false // Default to not hidden
     });
-
     await newReview.save();
 
-    // add this review to the herolist's comments array
-    const herolist = await HeroListsModel.findById(herolistId);
-    herolist.comments.push(newReview._id);
+    // Add the embedded review to the hero list
+    herolist.reviews.push(embeddedReview);
 
-    const ratings = await ReviewModel.find({ _id: { $in: herolist.comments } });
-
-    const totalRating = ratings.reduce((acc, curr) => acc + curr.rating, 0);
-    // console.log("totalRating",totalRating);
-    const newavgrating = totalRating / (ratings.length);
-    // console.log("ratings.length",ratings.length);
-    // console.log("newavgrating",newavgrating);
-    herolist.averageRating = newavgrating;
-    // console.log("herolist.averageRating",herolist.averageRating);
+    // Update average rating, excluding hidden reviews
+    const visibleReviews = await ReviewModel.find({ 
+      herolistId: herolistId, 
+      hidden: false 
+    });
+    const totalRating = visibleReviews.reduce((acc, curr) => acc + curr.rating, 0);
+    herolist.averageRating = totalRating / visibleReviews.length;
 
     await herolist.save();
-
-    //console.log("newReview saved");
 
     res.status(201).json(newReview);
   } catch (err) {
@@ -159,17 +165,21 @@ router.put("/updateList/:herolistId", async (req, res) => {
       return res.status(403).json({ message: 'Unauthorized to edit this list' });
     }
 
+    // Inside the updateList route
     const updatedList = await HeroListsModel.findByIdAndUpdate(
       herolistId,
       {
-        name, 
-        description, 
-        heronamelist, 
-        isPublic, 
-        lastModified: new Date() // Update the lastModified date
+        $set: {
+          name, 
+          description, 
+          heronamelist, 
+          isPublic, 
+          lastModified: new Date()
+        }
       },
       { new: true }
     );
+
     res.status(200).json(updatedList);
   } catch (err) {
     console.log(err);

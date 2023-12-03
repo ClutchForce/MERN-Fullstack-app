@@ -242,8 +242,17 @@ export const SavedHeroLists = () => {
                         </li>
                       ))}
                     </ul>
-                    <p>Comments: </p>
-                    {/* TODO: add functionality to display comments */}
+                    <p>Reviews: </p>
+                    {/* functionality to display comments */}
+                    <ul>
+                      {herolist.reviews.map((review) => (
+                        <li key={review._id}>
+                          <p>Commenter: {review.nickname}</p>
+                          <p>Comment: {review.comment}</p>
+                          <p>Rating: {review.rating}</p>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 )}
                 <button onClick={() => handleDeleteList(herolist._id)} style={{ marginLeft: '10px' }}>
