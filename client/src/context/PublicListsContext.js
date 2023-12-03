@@ -16,11 +16,12 @@ export const PublicListsProvider = ({ children }) => {
     }
   }, []); // Empty dependency array ensures this is created once
 
-//   searchPublicLists();
-//   console.log('publicListResults:', publicListResults);
+  const updatePublicLists = () => {
+    searchPublicLists(); // Re-fetch the public lists
+  };
 
   return (
-    <PublicListsContext.Provider value={{ publicListResults, searchPublicLists }}>
+    <PublicListsContext.Provider value={{ publicListResults, searchPublicLists, updatePublicLists }}>
       {children}
     </PublicListsContext.Provider>
   );

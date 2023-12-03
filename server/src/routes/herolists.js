@@ -1,6 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import { HeroListsModel } from "../models/HeroLists.js";
+import { ReviewModel } from "../models/Review.js";
 import { UserModel } from "../models/Users.js";
 import { verifyToken } from "./user.js";
 
@@ -60,7 +61,7 @@ router.post("/", verifyToken, async (req, res) => {
 router.get("/savedHeroLists/:userId", async (req, res) => {
   try {
     const result = await HeroListsModel.find({ userOwner: req.params.userId });
-    console.log("/savedHeroLists/:userId",result);
+    //console.log("/savedHeroLists/:userId",result);
     res.status(200).json(result);
   } catch (err) {
     res.status(500).json(err);
@@ -97,6 +98,53 @@ router.get("/public", async (req, res) => {
 //     res.status(500).json(err);
 //   }
 // });
+router.post("/review", async (req, res) => {
+  try {
+    const {userID, herolistId, comment, ratingNumber } = req.body;
+    // verifyToken middleware does not add userId to req  we need to manually get the logged in user
+
+
+    const date = new Date();
+    //rating is manadatory 
+
+    //console.log("/api/secure/herolists/review userId, herolistId, comment, rating, createdAt: ",userID, herolistId, comment, ratingNumber, date);
+
+    const newReview = new ReviewModel({
+      userId: userID,
+      herolistId,
+      comment,
+      rating: ratingNumber,
+      createdAt: date,
+    });
+
+    await newReview.save();
+
+    // add this review to the herolist's comments array
+    const herolist = await HeroListsModel.findById(herolistId);
+    herolist.comments.push(newReview._id);
+
+    const ratings = await ReviewModel.find({ _id: { $in: herolist.comments } });
+
+    const totalRating = ratings.reduce((acc, curr) => acc + curr.rating, 0);
+    // console.log("totalRating",totalRating);
+    const newavgrating = totalRating / (ratings.length + 1);
+    // console.log("ratings.length",ratings.length);
+    // console.log("newavgrating",newavgrating);
+    herolist.averageRating = newavgrating;
+    // console.log("herolist.averageRating",herolist.averageRating);
+
+    await herolist.save();
+
+    //console.log("newReview saved");
+
+    res.status(201).json(newReview);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Error adding review" });
+  }
+});
+
+
 
 
 

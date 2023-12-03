@@ -5,15 +5,15 @@ export const SearchResults = () => {
   const { searchResults } = useContext(SuperheroContext);
 
   return (
-    <div id="results-container">
+    <ul id="results-container">
       {searchResults.map((hero, index) => (
-        <div key={index}>
+        <li key={index}>
           <p>{hero.name}</p>
           <p>{hero.Publisher}</p>
 
           {/* Include other hero details you want to display */}
-        </div>
+        </li>
       ))}
-    </div>
+    </ul>
   );
 };
