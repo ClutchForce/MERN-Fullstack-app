@@ -43,13 +43,16 @@ export { router as userRouter };
 export const verifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (authHeader) {
-    jwt.verify(authHeader, "secret", (err) => {
+    jwt.verify(authHeader, "secret", (err, decoded) => {
       if (err) {
-        return res.sendStatus(403);
+        return res.status(403).json({ message: "Invalid token" });
       }
+
+      // Attach user ID to the request
+      req.userID = decoded.id; // Assuming 'id' is the user ID field in the token payload
       next();
     });
   } else {
-    res.sendStatus(401);
+    res.status(401).json({ message: "No token provided" });
   }
 };

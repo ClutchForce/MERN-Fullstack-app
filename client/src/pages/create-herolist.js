@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useGetUserID } from "../hooks/useGetUserInfo";
 import { useNavigate } from "react-router-dom";
@@ -7,6 +7,7 @@ import { useCookies } from "react-cookie";
 export const CreateHeroList = () => {
   const userID = useGetUserID();
   const [cookies, _] = useCookies(["access_token"]);
+  const [existingHeroLists, setExistingHeroLists] = useState([]);
   const [herolist, setHeroList] = useState({
     name: "",
     description: "",
@@ -22,6 +23,21 @@ export const CreateHeroList = () => {
   });
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchUserHeroLists = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:3001/api/secure/herolists/savedHeroLists/${userID}`,
+          { headers: { Authorization: cookies.access_token } }
+        );
+        setExistingHeroLists(response.data);
+      } catch (error) {
+        console.error('Error fetching hero lists:', error);
+      }
+    };
+    fetchUserHeroLists();
+  }, [userID, cookies.access_token]);
 
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target;
@@ -45,6 +61,25 @@ export const CreateHeroList = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    // Check for missing required attributes
+    if (!herolist.name.trim() || herolist.heronamelist.length === 0) {
+      alert("Name and at least one hero are required.");
+      return;
+    }
+
+    // Check for duplicate list name
+    if (existingHeroLists.some(list => list.name === herolist.name)) {
+      alert("A list with this name already exists.");
+      return;
+    }
+
+    // Check for list limit
+    if (existingHeroLists.length >= 20) {
+      alert("You cannot have more than 20 lists.");
+      return;
+    }
+
     try {
       await axios.post(
         "http://localhost:3001/api/open/herolists",

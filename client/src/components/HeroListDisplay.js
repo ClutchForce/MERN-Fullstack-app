@@ -2,6 +2,8 @@ import React, { useState, useContext } from 'react';
 import { PublicListsContext } from '../context/PublicListsContext'; // Context to be created
 import { useCookies } from 'react-cookie';
 import axios from 'axios';
+import { useGetUserID } from "../hooks/useGetUserInfo";
+
 
 
 export const HeroListDisplay = () => {
@@ -12,6 +14,7 @@ export const HeroListDisplay = () => {
   const [rating, setRating] = useState(0);
   const [cookies] = useCookies(['access_token']);
   const { updatePublicLists } = useContext(PublicListsContext);
+  const userID = useGetUserID();
 
   const [expandedListId, setExpandedListId] = useState(null); // Track the ID of the expanded list
   const [expandedListHeroId, setExpandedListHeroId] = useState(null); // Track the ID of the expanded list
@@ -55,6 +58,7 @@ export const HeroListDisplay = () => {
 
   const handleSelectHeroList = (herolist) => {
     setSelectedHeroList(herolist);
+    //print out the herolist comments array
     // Additional logic for opening review form can be added here
   };
 
@@ -76,7 +80,8 @@ export const HeroListDisplay = () => {
   
     try {
       const ratingNumber = Number(rating);
-      const userid = window.localStorage.getItem("userID");
+      // const userid = window.localStorage.getItem("userID");
+      const userid = userID;
   
       await axios.post('http://localhost:3001/api/secure/herolists/review', {
         userID: userid,
@@ -95,6 +100,13 @@ export const HeroListDisplay = () => {
       console.error('Error submitting review:', error);
     }
   };
+
+  const handleDuckDuckGoSearch = (heroName, publisher) => {
+    const query = encodeURIComponent(`${heroName} ${publisher}`);
+    const url = `https://duckduckgo.com/?q=${query}`;
+    window.open(url, '_blank');
+  };
+
   
 
   return (
@@ -151,13 +163,26 @@ export const HeroListDisplay = () => {
                           <div>
                             {/* Display hero details */}
                             <p>Hero Details: {JSON.stringify(heroDetails[heroName])}</p>
-                            {/* More formatting can be done here based on the structure of hero details */}
+                            {/* Duckduckgo functionality */}
+                            <button onClick={() => handleDuckDuckGoSearch(heroName, heroDetails[heroName].Publisher)}>
+                              Search on DuckDuckGo
+                            </button>
                           </div>
                         )}
                       </li>
                     ))}
                 </ul>
-                {/* Additional details can be added here */}
+                <p>Reviews: </p>
+                {/* TODO: add functionality to display comments */}
+                <ul>
+                  {herolist.reviews.map((review) => (
+                    <li key={review._id}>
+                      <p>Commenter: {review.nickname}</p>
+                      <p>Comment: {review.comment}</p>
+                      <p>Rating: {review.rating}</p>
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
           {/* Additional logic for expanding and showing details */}

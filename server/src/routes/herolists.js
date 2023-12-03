@@ -33,7 +33,6 @@ router.post("/", verifyToken, async (req, res) => {
     userOwner: req.body.userOwner,
 
   });
-  console.log(herolist);
 
   try {
     const result = await herolist.save();
@@ -57,10 +56,12 @@ router.post("/", verifyToken, async (req, res) => {
   }
 });
 
-// Get the herolists of a given user by user id
+// Get the private herolists of a given user by user id
 router.get("/savedHeroLists/:userId", async (req, res) => {
   try {
-    const result = await HeroListsModel.find({ userOwner: req.params.userId });
+    const result = await HeroListsModel.find({ userOwner: req.params.userId })
+      .sort({ lastModified: -1 })
+      .limit(20);
     //console.log("/savedHeroLists/:userId",result);
     res.status(200).json(result);
   } catch (err) {
@@ -83,21 +84,18 @@ router.get("/public", async (req, res) => {
   }
 });
 
-// // Get saved herolists
-// router.get("/savedHeroLists/:userId", async (req, res) => {
-//   try {
-//     const user = await UserModel.findById(req.params.userId);
-//     const savedHeroLists = await HeroListsModel.find({
-//       _id: { $in: user.savedHeroLists },
-//     });
+// Delete a herolist by ID of list 
+router.delete("/deleteSavedList/:herolistId", async (req, res) => {
+  try {
+    console.log("deleteSavedList/:herolistId", req.params.herolistId);
+    const result = await HeroListsModel.findByIdAndDelete(req.params.herolistId);
+    res.status(200).json(result);
+  } catch (err) {
+    console.log("deleteSavedList/:herolistId ERROR", err);
+    res.status(500).json(err);
+  }
+});
 
-//     console.log("hihi",savedHeroLists);
-//     res.status(201).json({ savedHeroLists });
-//   } catch (err) {
-//     console.log(err);
-//     res.status(500).json(err);
-//   }
-// });
 router.post("/review", async (req, res) => {
   try {
     const {userID, herolistId, comment, ratingNumber } = req.body;
@@ -127,7 +125,7 @@ router.post("/review", async (req, res) => {
 
     const totalRating = ratings.reduce((acc, curr) => acc + curr.rating, 0);
     // console.log("totalRating",totalRating);
-    const newavgrating = totalRating / (ratings.length + 1);
+    const newavgrating = totalRating / (ratings.length);
     // console.log("ratings.length",ratings.length);
     // console.log("newavgrating",newavgrating);
     herolist.averageRating = newavgrating;
@@ -144,41 +142,38 @@ router.post("/review", async (req, res) => {
   }
 });
 
-
-
-
-
-// Get a herolist by ID
-router.get("/:herolistId", async (req, res) => {
+// Update a herolist by ID
+router.put("/updateList/:herolistId", async (req, res) => {
   try {
-    const result = await HeroListsModel.findById(req.params.herolistId);
-    res.status(200).json(result);
-  } catch (err) {
-    res.status(500).json(err);
-  }
-});
+    const herolistId = req.params.herolistId;
+    const { name, description, heronamelist, isPublic } = req.body;
 
-// Save a HeroList
-router.put("/", async (req, res) => {
-  const herolist = await HeroListsModel.findById(req.body.herolistID);
-  const user = await UserModel.findById(req.body.userID);
-  try {
-    user.savedHeroLists.push(herolist);
-    await user.save();
-    res.status(201).json({ savedHeroLists: user.savedHeroLists });
-  } catch (err) {
-    res.status(500).json(err);
-  }
-});
+    //Before updating, checks if list exists and if the user making the request is the owner of the list.
+    //prevents users from editing lists that they do not own.
+    const existingList = await HeroListsModel.findById(herolistId);
+    if (!existingList) {
+      return res.status(404).json({ message: 'List not found' });
+    }
 
-// Get id of saved herolists
-router.get("/savedHeroLists/ids/:userId", async (req, res) => {
-  try {
-    const user = await UserModel.findById(req.params.userId);
-    res.status(201).json({ savedHeroLists: user?.savedHeroLists });
+    if (existingList.userOwner.toString() !== req.userID.toString()) {
+      return res.status(403).json({ message: 'Unauthorized to edit this list' });
+    }
+
+    const updatedList = await HeroListsModel.findByIdAndUpdate(
+      herolistId,
+      {
+        name, 
+        description, 
+        heronamelist, 
+        isPublic, 
+        lastModified: new Date() // Update the lastModified date
+      },
+      { new: true }
+    );
+    res.status(200).json(updatedList);
   } catch (err) {
     console.log(err);
-    res.status(500).json(err);
+    res.status(500).json({ message: 'Error updating list', error: err });
   }
 });
 

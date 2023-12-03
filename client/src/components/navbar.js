@@ -14,6 +14,7 @@ export const Navbar = () => {
   };
   return (
     <div className="navbar">
+      <h1>The Superhero App</h1>
       <Link to="/">Home</Link>
       {isAuthenticated && (
         <>

@@ -6,7 +6,7 @@ const router = express.Router();
 router.get('/search', async (req, res) => {
   const { name, gender, race, publisher, powers } = req.query;
 
-  console.log('Received query:', req.query);
+//   console.log('Received query:', req.query);
 
   try {
       let query = [];
@@ -36,7 +36,7 @@ router.get('/search', async (req, res) => {
       let finalQuery = query.length > 0 ? { $and: query } : {};
 
       const superheroes = await Superhero.find(finalQuery);
-      console.log('Superheroes found:', superheroes.length);
+      console.log('Superheroes search found:', superheroes.length);
 
       res.json(superheroes);
   } catch (err) {
