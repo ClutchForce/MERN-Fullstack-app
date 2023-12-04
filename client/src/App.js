@@ -6,6 +6,7 @@ import { CreateHeroList } from "./pages/create-herolist";
 import { Home } from "./pages/home";
 import { SavedHeroLists } from "./pages/saved-herolists";
 import { AdminDashboard } from "./pages/admin-dashboard";
+import { About } from "./pages/about";
 
 function App() {
   return (
@@ -13,7 +14,8 @@ function App() {
       <Router>
         <Navbar />
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<About />} />
+          <Route path="/home" element={<Home />} />
           <Route path="/create-herolist" element={<CreateHeroList />} />
           <Route path="/saved-herolists" element={<SavedHeroLists />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />

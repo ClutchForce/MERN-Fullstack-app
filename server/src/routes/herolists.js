@@ -187,7 +187,64 @@ router.put("/updateList/:herolistId", async (req, res) => {
   }
 });
 
+//Admin routes
 
+// Hide a review
+router.put("/hideReview/:reviewId", async (req, res) => {
+  // Implementation to hide review
+  console.log("hide review", req.params.reviewId);
+  try{
+    const review = await ReviewModel.findByIdAndUpdate(
+      req.params.reviewId,
+      { $set: { hidden: true } },
+      { new: true }
+    );
+    res.status(200).json(review);
+  }
+  catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error hiding review', error: err });
+  }
+});
+
+// Unhide a review
+router.put("/unhideReview/:reviewId", async (req, res) => {
+  // Implementation to unhide review
+  console.log("unhide review", req.params.reviewId);
+  try{
+    const review = await ReviewModel.findByIdAndUpdate(
+      req.params.reviewId,
+      { $set: { hidden: false } },
+      { new: true }
+    );
+    res.status(200).json(review);
+  }
+  catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error unhiding review', error: err });
+  }
+});
+
+// Get all reviews
+router.get("/getReviews", async (req, res) => {
+  try {
+    const reviews = await ReviewModel.find().lean(); // Use lean() for better performance
+
+    // Enhance each review with the user's nickname
+    for (const review of reviews) {
+      const user = await UserModel.findById(review.userId); // Assuming 'userId' is the field in ReviewModel
+      if (user) {
+        review.nickname = user.nickname; // Add the nickname to the review
+      } else {
+        review.nickname = 'Unknown'; // In case user is not found
+      }
+    }
+    res.json(reviews);
+  } catch (error) {
+    console.error('Error getting reviews:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 
 

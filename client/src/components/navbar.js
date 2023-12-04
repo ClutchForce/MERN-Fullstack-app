@@ -14,6 +14,10 @@ export const Navbar = () => {
     if (isAuthenticated) {
       checkAdminStatus(cookies.access_token).then(isAdmin => {
         setIsAdmin(isAdmin);
+        //if admin, set isAdmin to true create an alert saying an admin is logged in
+        // if (isAdmin) {
+        //   alert("Admin is logged in");
+        // }
       });
     }
   }, [isAuthenticated, cookies.access_token]);
@@ -40,7 +44,8 @@ export const Navbar = () => {
   return (
     <div className="navbar">
       <h1>The Superhero App</h1>
-      <Link to="/">Home</Link>
+      <Link to="/">About</Link>
+      <Link to="/home">Home</Link>
       {isAuthenticated && !isAdmin && (
         <>
           <Link to="/create-herolist">Create HeroList</Link>
