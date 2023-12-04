@@ -1,23 +1,59 @@
 import express from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 
 const router = express.Router();
 import { UserModel } from "../models/Users.js";
+import { body, validationResult } from "express-validator";
 
-router.post("/register", async (req, res) => {
+// open routes
+
+
+router.post("/register", [
+  body("username").notEmpty().withMessage("Username is required"),
+  body("nickname").notEmpty().withMessage("Nickname is required"),
+  body("password").notEmpty().withMessage("Password is required"),
+], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   const { username, nickname, password } = req.body;
-  //TODO: make sure that username and nickname are unique
+
   const user = await UserModel.findOne({ username });
   if (user) {
-    return res.status(400).json({ message: "Username or Nickname already exists" });
+    return res.status(400).json({ message: "Username/Email already exists" });
+  }
+  const userN = await UserModel.findOne({ nickname });
+  if (userN) {
+    return res.status(400).json({ message: "Nickname already exists" });
   }
   const hashedPassword = await bcrypt.hash(password, 10);
-  //TODO: add input validation here
-  const newUser = new UserModel({ username, nickname, password: hashedPassword });
+
+  const emailToken = crypto.randomBytes(16).toString('hex');
+  const newUser = new UserModel({ username, nickname, password: hashedPassword, emailToken });
   await newUser.save();
-  res.json({ message: "User registered successfully" });
+  res.json({ message: "User registered successfully", emailToken });
 });
+
+router.get("/verify-email/:token", async (req, res) => {
+  console.log('Verifying email');
+  const { token } = req.params;
+  const user = await UserModel.findOne({ emailToken: token });
+
+  if (!user) {
+    return res.status(400).json({ message: "Invalid or expired email verification token" });
+  }
+
+  user.emailVerified = true;
+  user.emailToken = null;
+  await user.save();
+
+  res.json({ message: "Email verified successfully" });
+});
+
 
 router.post("/login", async (req, res) => {
   const { username, password } = req.body;
@@ -37,6 +73,9 @@ router.post("/login", async (req, res) => {
   }
   if (user.isDisabled) {
     return res.status(400).json({ message: "Account is deactivated, please contact Admin (contact is in about section)" });
+  }
+  if (!user.emailVerified) {
+    return res.status(400).json({ message: "Email is not verified, please check your email for the validation link" });
   }
   //Token payload
   const token = jwt.sign({ id: user._id, isAdmin: user.isAdmin }, "secret");
@@ -61,6 +100,13 @@ export const verifyToken = (req, res, next) => {
   }
 };
 
+export const verifyAdmin = (req, res, next) => {
+  if (!req.isAdmin) {
+    return res.status(403).json({ message: 'Access denied' });
+  }
+  next();
+};
+
 router.get('/checkAdmin', verifyToken, async (req, res) => {
   try {
     const user = await UserModel.findById(req.userID);
@@ -73,9 +119,8 @@ router.get('/checkAdmin', verifyToken, async (req, res) => {
 });
 
 // Disable a user account
-router.put("/disable/:userId", async (req, res) => {
+router.put("/disable/:userId", verifyToken, verifyAdmin, async (req, res) => {
   // Implementation to disable user
-  console.log("disable user", req.params.userId);
   try {
     // Find user by ID and update isDisabled field to true
     const user = await UserModel.findByIdAndUpdate(
@@ -83,6 +128,7 @@ router.put("/disable/:userId", async (req, res) => {
       { $set: { isDisabled: true } },
       { new: true }
     );
+    res.status(200).json(user);
 
   } catch (err) {
     console.error(err);
@@ -91,9 +137,8 @@ router.put("/disable/:userId", async (req, res) => {
 });
 
 // Enable a user account
-router.put("/enable/:userId", async (req, res) => {
+router.put("/enable/:userId", verifyToken, verifyAdmin, async (req, res) => {
   // Implementation to enable user
-  console.log("enable user", req.params.userId);
   try {
     // Find user by ID and update isDisabled field to false
     const user = await UserModel.findByIdAndUpdate(
@@ -101,6 +146,7 @@ router.put("/enable/:userId", async (req, res) => {
       { $set: { isDisabled: false } },
       { new: true }
     );
+    res.status(200).json(user);
 
   } catch (err) {
     console.error(err);
@@ -109,7 +155,7 @@ router.put("/enable/:userId", async (req, res) => {
 });
 
 // Give a user admin privileges
-router.put("/upgrade/:userId", async (req, res) => {
+router.put("/upgrade/:userId", verifyToken, verifyAdmin, async (req, res) => {
   // Implementation to upgrade user
   console.log("upgrade user", req.params.userId);
   try {
@@ -119,6 +165,7 @@ router.put("/upgrade/:userId", async (req, res) => {
       { $set: { isAdmin: true } },
       { new: true }
     );
+    res.status(200).json(user);
 
   } catch (err) {
     console.error(err);
@@ -127,7 +174,7 @@ router.put("/upgrade/:userId", async (req, res) => {
 });
 
 // Get all users
-router.get("/getUsers", async (req, res) => {
+router.get("/getUsers", verifyToken, verifyAdmin, async (req, res) => {
   // Implementation to get all users
 
   try {
@@ -141,7 +188,7 @@ router.get("/getUsers", async (req, res) => {
 });
 
 //Get nickname by userID
-router.get("/getNickname/:userId", async (req, res) => {
+router.get("/getNickname/:userId", verifyToken, verifyAdmin, async (req, res) => {
   // Implementation to get nickname
   try {
     const user = await UserModel.findById(req.params.userId);

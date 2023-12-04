@@ -39,6 +39,7 @@ export const Navbar = () => {
   const logout = () => {
     setCookies("access_token", "");
     window.localStorage.clear();
+    setIsAdmin(false);
     navigate("/auth");
   };
   return (

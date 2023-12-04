@@ -1,9 +1,10 @@
 import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
-import { userRouter, verifyToken } from "./routes/user.js";
+import { userRouter, verifyToken, verifyAdmin } from "./routes/user.js";
 import { herolistsRouter } from "./routes/herolists.js";
 import { heroinfoRouter } from "./routes/heroinfo.js"; // Import the superhero info router
+import { policiesRouter } from "./routes/policies.js";
 
 const PORT = process.env.PORT || 3001;
 
@@ -27,16 +28,9 @@ app.use("/api/secure/users", userRouter);
 // Admin-specific routes
 app.use('/api/admin', verifyToken, verifyAdmin);
 
-function verifyAdmin(req, res, next) {
-  if (!req.isAdmin) {
-    return res.status(403).json({ message: 'Access denied' });
-  }
-  // console.log('Admin verified');
-  next();
-}
-
 app.use('/api/admin/users', userRouter);
 app.use('/api/admin/herolists', herolistsRouter);
+app.use('/api/admin/policies', policiesRouter);
 
 mongoose.connect(
   "mongodb://localhost:27017/se3316Lab4",
@@ -47,3 +41,4 @@ mongoose.connect(
 );
 
 app.listen(PORT, () => console.log("Server started"));
+

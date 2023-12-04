@@ -7,6 +7,7 @@ import { Home } from "./pages/home";
 import { SavedHeroLists } from "./pages/saved-herolists";
 import { AdminDashboard } from "./pages/admin-dashboard";
 import { About } from "./pages/about";
+// import { EmailVerification } from "./pages/email-verification";
 
 function App() {
   return (
@@ -20,6 +21,8 @@ function App() {
           <Route path="/saved-herolists" element={<SavedHeroLists />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/auth" element={<Auth />} />
+          {/* <Route path="/verify-email/:token" element={<EmailVerification />} /> */}
+
         </Routes>
       </Router>
     </div>

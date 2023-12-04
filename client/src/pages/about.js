@@ -15,6 +15,14 @@ export const About = () => {
         <p>pgherghe@uwo.ca</p>
         <p> </p>
         <p>This app was created by Paul</p>
+        <div className="navbar">
+          <nav>
+              {/* ... other navigation items ... */}
+              <a href="/policies/security-policy.html">Security Policy</a>
+              <a href="/policies/aup.html">Acceptable Use Policy</a>
+              <a href="/policies/dmca-policy.html">DMCA Policy</a>
+          </nav>
+        </div>
       </div>
     );
   };

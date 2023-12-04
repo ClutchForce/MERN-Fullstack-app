@@ -3,6 +3,8 @@ import { Superhero, SuperheroPower } from "../models/HeroInfo.js"; // Adjust imp
 
 const router = express.Router();
 
+// open routes
+
 router.get('/search', async (req, res) => {
   const { name, gender, race, publisher, powers } = req.query;
 
@@ -91,7 +93,6 @@ router.get("/getHeroDetails/:name", async (req, res) => {
   });
   
 
-//Weapons Master
 
 // ...other routes...
 

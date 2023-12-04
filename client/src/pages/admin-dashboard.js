@@ -8,7 +8,21 @@ export const AdminDashboard = () => {
   const [showUsers, setShowUsers] = useState(false);
   const [showReviews, setShowReviews] = useState(false);
   const [cookies] = useCookies(["access_token"]);
+  const [policyContent, setPolicyContent] = useState('');
 
+  const updatePolicy = async (policyName) => {
+      try {
+          await axios.post('/api/admin/policies/updatePolicy', {
+              policyName,
+              content: policyContent
+          }, {
+              headers: { Authorization: `${cookies.access_token}` }
+          });
+          alert('Policy updated successfully!');
+      } catch (error) {
+          console.error('Error updating policy:', error);
+      }
+  };
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -40,16 +54,14 @@ export const AdminDashboard = () => {
     fetchReviews();
   }, [fetchUsers, fetchReviews]); // Add fetch functions to the dependency array
 
-
-
   // Handlers for user and review management
   const handleDisableUser = useCallback(async (userId) => {
     try {
+      console.log("api call user", userId);
+
       await axios.put(`/api/admin/users/disable/${userId}`, {}, {
         headers: { Authorization: `${cookies.access_token}` }
       });
-      // Update local state
-      setUsers(users.map(user => user._id === userId ? { ...user, isDisabled: true } : user));
       fetchUsers();
     } catch (error) {
       console.error('Error disabling user:', error);
@@ -61,8 +73,6 @@ export const AdminDashboard = () => {
       await axios.put(`/api/admin/users/enable/${userId}`, {}, {
         headers: { Authorization: `${cookies.access_token}` }
       });
-      // Update local state
-      setUsers(users.map(user => user._id === userId ? { ...user, isDisabled: false } : user));
       fetchUsers();
     } catch (error) {
       console.error('Error enabling user:', error);
@@ -83,6 +93,7 @@ export const AdminDashboard = () => {
       }
     }
   }, [cookies.access_token, fetchUsers]);
+
   const handleHideReview = useCallback(async (reviewId) => {
     try {
       await axios.put(`/api/admin/herolists/hideReview/${reviewId}`, {}, {
@@ -111,7 +122,7 @@ export const AdminDashboard = () => {
 
     
       {/* Toggle Users List */}
-      <p htmlFor="showUsers">Show Users:</p>
+      <h3 htmlFor="showUsers">Show Users:</h3>
 
       <ul>
       <button onClick={() => setShowUsers(!showUsers)}>Toggle Users</button>
@@ -123,11 +134,8 @@ export const AdminDashboard = () => {
               <p>Nickname: {user.nickname}</p>
               {/* Conditional rendering for Disable/Enable User Button */}
               <p>Disabled: {user.isDisabled ? "Yes" : "No"}</p>
-              {!user.isDisabled ? (
-                <button onClick={() => handleDisableUser(user._id)}>Disable</button>
-              ) : (
-                <button onClick={() => handleEnableUser(user._id)}>Enable</button>
-              )}
+              <button onClick={() => handleDisableUser(user._id)}>Disable</button>
+              <button onClick={() => handleEnableUser(user._id)}>Enable</button>
               {/* Upgrade to Admin Button */}
               {!user.isAdmin && (
                 <button onClick={() => handleUpgradeToAdmin(user._id)}>Upgrade to Admin</button>
@@ -140,7 +148,7 @@ export const AdminDashboard = () => {
 
 
       {/* Toggle Reviews List */}
-      <p htmlFor="showUsers">Show Reviews:</p>
+      <h3 htmlFor="showUsers">Show Reviews:</h3>
       <ul>
       <button onClick={() => setShowReviews(!showReviews)}>Toggle Reviews</button>
       {showReviews && (
@@ -160,6 +168,21 @@ export const AdminDashboard = () => {
           ))}
         </div>
       )}
+      </ul>
+
+      <h3>Update Policy</h3>
+      <ul>
+        <div>
+          <p>Policy Content to be added:</p>
+          <p>Instructions, content item should include date followed by the policy added or updated:</p>
+
+          <textarea value={policyContent} onChange={(e) => setPolicyContent(e.target.value)}></textarea>
+        </div>
+        <div>
+          <button onClick={() => updatePolicy('security-policy')}>Update Security Policy</button>
+          <button onClick={() => updatePolicy('aup')}>Update AUP</button>
+          <button onClick={() => updatePolicy('dmca-policy')}>Update DMCA Policy</button>
+        </div>
       </ul>
     </div>
   );

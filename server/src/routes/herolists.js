@@ -4,8 +4,11 @@ import { HeroListsModel } from "../models/HeroLists.js";
 import { ReviewModel } from "../models/Review.js";
 import { UserModel } from "../models/Users.js";
 import { verifyToken } from "./user.js";
+import { verifyAdmin } from "./user.js";
 
 const router = express.Router();
+
+// open routes
 
 router.get("/", async (req, res) => {
   try {
@@ -15,6 +18,24 @@ router.get("/", async (req, res) => {
     res.status(500).json(err);
   }
 });
+
+
+// Get the first 10 public herolists by date modified
+router.get("/public", async (req, res) => {
+  try {
+    const result = await HeroListsModel.find({ isPublic: true })
+      .sort({ lastModified: -1 })
+      .limit(10);
+    //Debug log with apis name and result
+    //console.log("herolists/public", result);
+    res.status(200).json(result);
+  } catch (err) {
+    console.log("herolists/public ERROR",err);
+    res.status(500).json(err);
+  }
+});
+
+//Secure routes
 
 // Create a new herolist
 router.post("/", verifyToken, async (req, res) => {
@@ -57,7 +78,7 @@ router.post("/", verifyToken, async (req, res) => {
 });
 
 // Get the private herolists of a given user by user id
-router.get("/savedHeroLists/:userId", async (req, res) => {
+router.get("/savedHeroLists/:userId", verifyToken, async (req, res) => {
   try {
     const result = await HeroListsModel.find({ userOwner: req.params.userId })
       .sort({ lastModified: -1 })
@@ -69,22 +90,7 @@ router.get("/savedHeroLists/:userId", async (req, res) => {
   }
 });
 
-// Get the first 10 public herolists by date modified
-router.get("/public", async (req, res) => {
-  try {
-    const result = await HeroListsModel.find({ isPublic: true })
-      .sort({ lastModified: -1 })
-      .limit(10);
-    //Debug log with apis name and result
-    //console.log("herolists/public", result);
-    res.status(200).json(result);
-  } catch (err) {
-    console.log("herolists/public ERROR",err);
-    res.status(500).json(err);
-  }
-});
-
-router.delete("/deleteSavedList/:herolistId", async (req, res) => {
+router.delete("/deleteSavedList/:herolistId", verifyToken, async (req, res) => {
   try {
     const herolistId = req.params.herolistId;
 
@@ -102,7 +108,7 @@ router.delete("/deleteSavedList/:herolistId", async (req, res) => {
 });
 
 
-router.post("/review", async (req, res) => {
+router.post("/review", verifyToken, async (req, res) => {
   try {
     const { userID, herolistId, comment, ratingNumber } = req.body;
     const user = await UserModel.findById(userID);
@@ -148,8 +154,9 @@ router.post("/review", async (req, res) => {
   }
 });
 
+
 // Update a herolist by ID
-router.put("/updateList/:herolistId", async (req, res) => {
+router.put("/updateList/:herolistId", verifyToken, async (req, res) => {
   try {
     const herolistId = req.params.herolistId;
     const { name, description, heronamelist, isPublic } = req.body;
@@ -190,9 +197,8 @@ router.put("/updateList/:herolistId", async (req, res) => {
 //Admin routes
 
 // Hide a review
-router.put("/hideReview/:reviewId", async (req, res) => {
+router.put("/hideReview/:reviewId", verifyToken, verifyAdmin, async (req, res) => {
   // Implementation to hide review
-  console.log("hide review", req.params.reviewId);
   try{
     const review = await ReviewModel.findByIdAndUpdate(
       req.params.reviewId,
@@ -208,9 +214,8 @@ router.put("/hideReview/:reviewId", async (req, res) => {
 });
 
 // Unhide a review
-router.put("/unhideReview/:reviewId", async (req, res) => {
+router.put("/unhideReview/:reviewId", verifyToken, verifyAdmin, async (req, res) => {
   // Implementation to unhide review
-  console.log("unhide review", req.params.reviewId);
   try{
     const review = await ReviewModel.findByIdAndUpdate(
       req.params.reviewId,
@@ -226,7 +231,7 @@ router.put("/unhideReview/:reviewId", async (req, res) => {
 });
 
 // Get all reviews
-router.get("/getReviews", async (req, res) => {
+router.get("/getReviews", verifyToken, verifyAdmin, async (req, res) => {
   try {
     const reviews = await ReviewModel.find().lean(); // Use lean() for better performance
 
