@@ -20,7 +20,21 @@ app.use("/api/secure", verifyToken);
 
 // Routes after this will require authentication
 app.use("/api/secure/herolists", herolistsRouter);
+app.use("/api/secure/users", userRouter);
 // Additional secure routes...
+
+// Admin-specific routes
+app.use('/api/admin', verifyToken, verifyAdmin);
+
+function verifyAdmin(req, res, next) {
+  if (!req.isAdmin) {
+    return res.status(403).json({ message: 'Access denied' });
+  }
+  next();
+}
+
+app.use('/api/admin/users', userRouter);
+app.use('/api/admin/herolists', herolistsRouter);
 
 mongoose.connect(
   "mongodb://localhost:27017/se3316Lab4",

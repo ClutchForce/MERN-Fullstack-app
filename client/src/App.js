@@ -5,6 +5,7 @@ import { Auth } from "./pages/auth";
 import { CreateHeroList } from "./pages/create-herolist";
 import { Home } from "./pages/home";
 import { SavedHeroLists } from "./pages/saved-herolists";
+import { AdminDashboard } from "./pages/admin-dashboard";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/create-herolist" element={<CreateHeroList />} />
           <Route path="/saved-herolists" element={<SavedHeroLists />} />
+          <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/auth" element={<Auth />} />
         </Routes>
       </Router>

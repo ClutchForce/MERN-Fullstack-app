@@ -20,6 +20,8 @@ const Login = () => {
 
   const navigate = useNavigate();
 
+
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -34,6 +36,7 @@ const Login = () => {
       window.localStorage.setItem("userID", result.data.userID);
       navigate("/");
     } catch (error) {
+      //TODO: handle errors with alert
       console.error(error);
     }
   };
@@ -84,6 +87,7 @@ const Register = () => {
       });
       alert("Registration Completed! Now login.");
     } catch (error) {
+      //TODO: handle errors with alert
       console.error(error);
     }
   };
