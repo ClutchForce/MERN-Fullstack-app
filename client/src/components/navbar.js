@@ -26,7 +26,7 @@ export const Navbar = () => {
 
   const checkAdminStatus = async (token) => {
     try {
-      const response = await axios.get('http://localhost:3001/api/secure/users/checkAdmin', {
+      const response = await axios.get('/api/secure/users/checkAdmin', {
         headers: { Authorization: token }
       });
       return response.data.isAdmin;

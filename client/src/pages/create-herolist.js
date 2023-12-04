@@ -28,7 +28,7 @@ export const CreateHeroList = () => {
     const fetchUserHeroLists = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3001/api/secure/herolists/savedHeroLists/${userID}`,
+          `/api/secure/herolists/savedHeroLists/${userID}`,
           { headers: { Authorization: cookies.access_token } }
         );
         setExistingHeroLists(response.data);
@@ -82,7 +82,7 @@ export const CreateHeroList = () => {
 
     try {
       await axios.post(
-        "http://localhost:3001/api/open/herolists",
+        "/api/open/herolists",
         { ...herolist },
         {
           headers: { authorization: cookies.access_token },

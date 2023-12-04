@@ -10,7 +10,7 @@ export const SuperheroProvider = ({ children }) => {
 
   const searchSuperheroes = async (searchParams) => {
     try {
-      const response = await axios.get(`http://localhost:3001/api/open/superheroes/search`, {
+      const response = await axios.get(`/api/open/superheroes/search`, {
         params: searchParams
       });
       setSearchResults(response.data);

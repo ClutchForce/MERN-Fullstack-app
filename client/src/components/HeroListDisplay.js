@@ -31,7 +31,7 @@ export const HeroListDisplay = () => {
 
   const fetchHeroDetails = async (heroName) => {
     try {
-      const response = await axios.get(`http://localhost:3001/api/open/superheroes/getHeroDetails/${heroName}`);
+      const response = await axios.get(`/api/open/superheroes/getHeroDetails/${heroName}`);
       setHeroDetails(prevState => ({
         ...prevState,
         [heroName]: response.data
@@ -83,7 +83,7 @@ export const HeroListDisplay = () => {
       // const userid = window.localStorage.getItem("userID");
       const userid = userID;
   
-      await axios.post('http://localhost:3001/api/secure/herolists/review', {
+      await axios.post('/api/secure/herolists/review', {
         userID: userid,
         herolistId: selectedHeroList._id,
         comment,

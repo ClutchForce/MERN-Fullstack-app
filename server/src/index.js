@@ -5,6 +5,7 @@ import { userRouter, verifyToken } from "./routes/user.js";
 import { herolistsRouter } from "./routes/herolists.js";
 import { heroinfoRouter } from "./routes/heroinfo.js"; // Import the superhero info router
 
+const PORT = process.env.PORT || 3001;
 
 const app = express();
 
@@ -45,4 +46,4 @@ mongoose.connect(
   }
 );
 
-app.listen(3001, () => console.log("Server started"));
+app.listen(PORT, () => console.log("Server started"));

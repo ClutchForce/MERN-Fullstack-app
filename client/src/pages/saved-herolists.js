@@ -16,7 +16,7 @@ export const SavedHeroLists = () => {
   const fetchSavedHeroLists = useCallback(async () => {
     try {
       const response = await axios.get(
-        `http://localhost:3001/api/secure/herolists/savedHeroLists/${userID}`,
+        `/api/secure/herolists/savedHeroLists/${userID}`,
         { headers: { Authorization: `${cookies.access_token}` } }
       );
       setSavedHeroLists(response.data);
@@ -40,7 +40,7 @@ export const SavedHeroLists = () => {
       setExpandedHeroId(heroName);
       if (!heroDetails[heroName]) {
         try {
-          const response = await axios.get(`http://localhost:3001/api/open/superheroes/getHeroDetails/${heroName}`);
+          const response = await axios.get(`/api/open/superheroes/getHeroDetails/${heroName}`);
           setHeroDetails({ ...heroDetails, [heroName]: response.data });
         } catch (error) {
           console.error('Error fetching hero details:', error);
@@ -109,7 +109,7 @@ export const SavedHeroLists = () => {
   
     for (const heroName of filteredHeroNames) {
       try {
-        await axios.get(`http://localhost:3001/api/open/superheroes/getHeroDetails/${heroName}`);
+        await axios.get(`/api/open/superheroes/getHeroDetails/${heroName}`);
       } catch (error) {
         if (error.response && error.response.status === 404) {
           alert(`Hero ${heroName} does not exist.`);
@@ -126,7 +126,7 @@ export const SavedHeroLists = () => {
     // Proceed with update API call
     const updatedListDetails = { ...editListDetails, heronamelist: filteredHeroNames };
     try {
-      await axios.put(`http://localhost:3001/api/secure/herolists/updateList/${editListId}`, updatedListDetails, {
+      await axios.put(`/api/secure/herolists/updateList/${editListId}`, updatedListDetails, {
         headers: { Authorization: `${cookies.access_token}` }
       });
       fetchSavedHeroLists(); // Refresh the lists
@@ -144,7 +144,7 @@ export const SavedHeroLists = () => {
     const isConfirmed = window.confirm("Are you sure you want to delete this list?");
     if (isConfirmed) {
       try {
-        await axios.delete(`http://localhost:3001/api/secure/herolists/deleteSavedList/${herolistId}`, {
+        await axios.delete(`/api/secure/herolists/deleteSavedList/${herolistId}`, {
           headers: { Authorization: `${cookies.access_token}` }
         });
         fetchSavedHeroLists(); // Refetch the lists to update UI

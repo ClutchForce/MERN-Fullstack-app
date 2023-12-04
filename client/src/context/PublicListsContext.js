@@ -9,7 +9,7 @@ export const PublicListsProvider = ({ children }) => {
 
   const searchPublicLists = useCallback(async () => {
     try {
-      const response = await axios.get(`http://localhost:3001/api/open/herolists/public`);
+      const response = await axios.get(`/api/open/herolists/public`);
       setPublicListsResults(response.data);
     } catch (error) {
       console.error('Error fetching herolists:', error);

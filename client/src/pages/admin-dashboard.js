@@ -12,7 +12,7 @@ export const AdminDashboard = () => {
 
   const fetchUsers = useCallback(async () => {
     try {
-      const response = await axios.get("http://localhost:3001/api/admin/users/getUsers", {
+      const response = await axios.get("/api/admin/users/getUsers", {
         headers: { Authorization: cookies.access_token }
       });
       // Filter out admin users
@@ -26,7 +26,7 @@ export const AdminDashboard = () => {
 
   const fetchReviews = useCallback(async () => {
     try {
-      const response = await axios.get("http://localhost:3001/api/admin/herolists/getReviews", {
+      const response = await axios.get("/api/admin/herolists/getReviews", {
         headers: { Authorization: cookies.access_token }
       });
       setReviews(response.data);
@@ -45,7 +45,7 @@ export const AdminDashboard = () => {
   // Handlers for user and review management
   const handleDisableUser = useCallback(async (userId) => {
     try {
-      await axios.put(`http://localhost:3001/api/admin/users/disable/${userId}`, {}, {
+      await axios.put(`/api/admin/users/disable/${userId}`, {}, {
         headers: { Authorization: `${cookies.access_token}` }
       });
       // Update local state
@@ -58,7 +58,7 @@ export const AdminDashboard = () => {
   
   const handleEnableUser = useCallback(async (userId) => {
     try {
-      await axios.put(`http://localhost:3001/api/admin/users/enable/${userId}`, {}, {
+      await axios.put(`/api/admin/users/enable/${userId}`, {}, {
         headers: { Authorization: `${cookies.access_token}` }
       });
       // Update local state
@@ -74,7 +74,7 @@ export const AdminDashboard = () => {
     if (isConfirmed) {
       // Send request to upgrade user to admin
       try {
-        await axios.put(`http://localhost:3001/api/admin/users/upgrade/${userId}`, {}, {
+        await axios.put(`/api/admin/users/upgrade/${userId}`, {}, {
           headers: { Authorization: `${cookies.access_token}` }
         });
         fetchUsers();
@@ -85,7 +85,7 @@ export const AdminDashboard = () => {
   }, [cookies.access_token, fetchUsers]);
   const handleHideReview = useCallback(async (reviewId) => {
     try {
-      await axios.put(`http://localhost:3001/api/admin/herolists/hideReview/${reviewId}`, {}, {
+      await axios.put(`/api/admin/herolists/hideReview/${reviewId}`, {}, {
         headers: { Authorization: `${cookies.access_token}` }
       });
       fetchReviews();
@@ -95,7 +95,7 @@ export const AdminDashboard = () => {
   }, [cookies.access_token, fetchReviews]);
   const handleUnhideReview = useCallback(async (reviewId) => {
     try {
-      await axios.put(`http://localhost:3001/api/admin/herolists/unhideReview/${reviewId}`, {}, {
+      await axios.put(`/api/admin/herolists/unhideReview/${reviewId}`, {}, {
         headers: { Authorization: `${cookies.access_token}` }
       });
       fetchReviews();

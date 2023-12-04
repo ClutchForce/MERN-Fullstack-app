@@ -15,7 +15,7 @@ export const SearchResults = () => {
       if (!heroDetails[heroName]) {
         // Fetch hero details if not already fetched
         try {
-          const response = await axios.get(`http://localhost:3001/api/open/superheroes/getHeroDetails/${heroName}`);
+          const response = await axios.get(` /api/open/superheroes/getHeroDetails/${heroName}`);
           setHeroDetails(prevState => ({
             ...prevState,
             [heroName]: response.data
