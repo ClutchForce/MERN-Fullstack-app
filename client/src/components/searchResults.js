@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { SuperheroContext } from '../context/SuperheroContext';
 import axios from 'axios';
+import { HeroDetails } from './HeroDetails';
 
 export const SearchResults = () => {
   const { searchResults } = useContext(SuperheroContext);
@@ -46,7 +47,7 @@ export const SearchResults = () => {
           {expandedHeroId === hero.name && heroDetails[hero.name] && (
             <div>
               {/* Display hero details */}
-              <p>Hero Details: {JSON.stringify(heroDetails[hero.name])}</p>
+              <HeroDetails details={heroDetails[hero.name]} />
               {/* Duckduckgo functionality */}
               <button onClick={() => handleDuckDuckGoSearch(hero.name, hero.Publisher)}>
                 Search on DuckDuckGo

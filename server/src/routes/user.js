@@ -9,7 +9,6 @@ import { body, validationResult } from "express-validator";
 
 // open routes
 
-
 router.post("/register", [
   body("username").notEmpty().withMessage("Username is required"),
   body("nickname").notEmpty().withMessage("Nickname is required"),
@@ -55,7 +54,15 @@ router.get("/verify-email/:token", async (req, res) => {
 });
 
 
-router.post("/login", async (req, res) => {
+router.post("/login", [
+  body("username").notEmpty().withMessage("Username is required"),
+  body("password").notEmpty().withMessage("Password is required"),
+], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   const { username, password } = req.body;
 
   const user = await UserModel.findOne({ username });

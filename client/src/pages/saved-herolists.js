@@ -2,6 +2,8 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useGetUserID } from "../hooks/useGetUserInfo";
 import { useCookies } from "react-cookie";
 import axios from "axios";
+import { HeroDetails } from "../components/HeroDetails";
+
 
 export const SavedHeroLists = () => {
   const [savedHeroLists, setSavedHeroLists] = useState([]);
@@ -232,7 +234,7 @@ export const SavedHeroLists = () => {
                           </button>
                           {expandedHeroId === heroName && heroDetails[heroName] && (
                             <div>
-                              <p>Hero Details: {JSON.stringify(heroDetails[heroName])}</p>
+                              <HeroDetails details={heroDetails[heroName]} />
                               {/* Duckduckgo functionality */}
                               <button onClick={() => handleDuckDuckGoSearch(heroName, heroDetails[heroName].Publisher)}>
                                 Search on DuckDuckGo

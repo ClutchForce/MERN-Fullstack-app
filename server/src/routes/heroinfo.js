@@ -1,50 +1,71 @@
 import express from "express";
 import { Superhero, SuperheroPower } from "../models/HeroInfo.js"; // Adjust imports as necessary
+import { body, query, validationResult } from 'express-validator';
+import stringSimilarity from 'string-similarity';
 
 const router = express.Router();
 
 // open routes
 
-router.get('/search', async (req, res) => {
+
+router.get('/search', [
+  query('name').optional().isString(),
+  query('gender').optional().isString(),
+  query('race').optional().isString(),
+  query('publisher').optional().isString(),
+  query('powers').optional().isString()
+], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   const { name, gender, race, publisher, powers } = req.query;
+  // Your existing code here...
+
 
 //   console.log('Received query:', req.query);
 
-  try {
-      let query = [];
-      if (name) {
-          query.push({ name: new RegExp(name, 'i') });
-      }
-      if (gender) {
-          query.push({ Gender: gender });
-      }
-      if (race) {
-          query.push({ Race: race });
-      }
-      if (publisher) {
-          query.push({ Publisher: publisher });
-      }
+try {
+  let superheroes = await Superhero.find(); // Fetch all superheroes
 
-      if (powers) {
-          const powerResults = await SuperheroPower.find({ [powers]: true });
-          const heroNamesWithPower = powerResults.map(power => power.hero_names);
-          console.log('Hero names with power:', heroNamesWithPower);
-
-          if (heroNamesWithPower.length > 0) {
-              query.push({ name: { $in: heroNamesWithPower } });
-          }
-      }
-
-      let finalQuery = query.length > 0 ? { $and: query } : {};
-
-      const superheroes = await Superhero.find(finalQuery);
-      console.log('Superheroes search found:', superheroes.length);
-
-      res.json(superheroes);
-  } catch (err) {
-      console.error('Error fetching superheroes:', err);
-      res.status(500).send('Server error');
+  //soft-matched search
+  if (name) {
+    superheroes = superheroes.filter(hero =>
+      stringSimilarity.compareTwoStrings(hero.name.toLowerCase(), name.toLowerCase()) >= 0.7
+    );
   }
+  if (gender) {
+    superheroes = superheroes.filter(hero =>
+      stringSimilarity.compareTwoStrings(hero.Gender.toLowerCase(), gender.toLowerCase()) >= 0.7
+    );
+  }
+  if (race) {
+    superheroes = superheroes.filter(hero =>
+      stringSimilarity.compareTwoStrings(hero.Race.toLowerCase(), race.toLowerCase()) >= 0.7
+    );
+  }
+  if (publisher) {
+    superheroes = superheroes.filter(hero =>
+      stringSimilarity.compareTwoStrings(hero.Publisher.toLowerCase(), publisher.toLowerCase()) >= 0.7
+    );
+  }
+
+  if (powers) {
+    // Assume SuperheroPower is a model that contains powers related to superheroes
+    const powerResults = await SuperheroPower.find({ 
+      power: new RegExp(powers, 'i') // Use RegExp for case-insensitive match
+    });
+
+    const heroIdsWithPower = powerResults.map(power => power.heroId);
+    superheroes = superheroes.filter(hero => heroIdsWithPower.includes(hero.id));
+  }
+
+  res.json(superheroes);
+} catch (err) {
+  console.error('Error fetching superheroes:', err);
+  res.status(500).send('Server error');
+}
 });
 
 // Get hero info by name getHeroDetails/{heroname}

@@ -3,6 +3,7 @@ import { PublicListsContext } from '../context/PublicListsContext'; // Context t
 import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { useGetUserID } from "../hooks/useGetUserInfo";
+import { HeroDetails } from './HeroDetails';
 
 
 
@@ -163,7 +164,8 @@ export const HeroListDisplay = () => {
                         {expandedListHeroId === heroName && heroDetails[heroName] && (
                           <div>
                             {/* Display hero details */}
-                            <p>Hero Details: {JSON.stringify(heroDetails[heroName])}</p>
+                            <HeroDetails details={heroDetails[heroName]} />
+
                             {/* Duckduckgo functionality */}
                             <button onClick={() => handleDuckDuckGoSearch(heroName, heroDetails[heroName].Publisher)}>
                               Search on DuckDuckGo

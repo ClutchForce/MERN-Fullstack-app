@@ -5,6 +5,7 @@ import { ReviewModel } from "../models/Review.js";
 import { UserModel } from "../models/Users.js";
 import { verifyToken } from "./user.js";
 import { verifyAdmin } from "./user.js";
+import { validationResult } from "express-validator";
 
 const router = express.Router();
 
@@ -37,8 +38,14 @@ router.get("/public", async (req, res) => {
 
 //Secure routes
 
+
 // Create a new herolist
 router.post("/", verifyToken, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   const user = await UserModel.findById(req.body.userOwner);
   const herolist = new HeroListsModel({
     _id: new mongoose.Types.ObjectId(),
@@ -52,7 +59,6 @@ router.post("/", verifyToken, async (req, res) => {
     ratings: req.body.ratings,
     nickname: user.nickname,
     userOwner: req.body.userOwner,
-
   });
 
   try {
@@ -109,6 +115,11 @@ router.delete("/deleteSavedList/:herolistId", verifyToken, async (req, res) => {
 
 
 router.post("/review", verifyToken, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   try {
     const { userID, herolistId, comment, ratingNumber } = req.body;
     const user = await UserModel.findById(userID);
