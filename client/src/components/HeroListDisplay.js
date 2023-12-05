@@ -108,6 +108,19 @@ export const HeroListDisplay = () => {
     window.open(url, '_blank');
   };
 
+  const handleReportReview = async (reviewId) => {
+    const isConfirmed = window.confirm("Are you sure you want to report this review?");
+    if (isConfirmed) {
+      try {
+        await axios.post(`/api/secure/policies/logDmcaRequest/${reviewId}`, {}, {
+          headers: { Authorization: `${cookies.access_token}` }
+        });
+      } catch (error) {
+        console.error('Error reporting review:', error);
+      }
+    }
+  }
+
   
 
   return (
@@ -177,13 +190,21 @@ export const HeroListDisplay = () => {
                 </ul>
                 <p>Reviews: </p>
                 {/* functionality to display comments */}
+                {/* TODO make it not display hidden reviews*/}
+
                 <ul>
                   {herolist.reviews.map((review) => (
-                    <li key={review._id}>
-                      <p>Commenter: {review.nickname}</p>
-                      <p>Comment: {review.comment}</p>
-                      <p>Rating: {review.rating}</p>
-                    </li>
+                    review.hidden === false && (
+                      <li key={review._id}>
+                        <p>Commenter's Nickname: {review.nickname}</p>
+                        <p>Rating: {review.rating}</p>
+                        <p>Comment: {review.comment}</p>
+                        {/* if statement for hidden review or not */}
+
+                        {/* Hide/Unhide Review Button */}
+                        <button onClick={() => handleReportReview(review._id)}>Report</button>
+                      </li>
+                    )
                   ))}
                 </ul>
               </div>

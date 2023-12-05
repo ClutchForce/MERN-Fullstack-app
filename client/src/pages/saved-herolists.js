@@ -163,6 +163,8 @@ export const SavedHeroLists = () => {
   };
 
 
+
+
   return (
     <div>
       <h1>My HeroLists</h1>
@@ -245,7 +247,9 @@ export const SavedHeroLists = () => {
                       ))}
                     </ul>
                     <p>Reviews: </p>
-                    {/* functionality to display comments */}
+                    {/* functionality to display comments if they are visable*/}
+                    {/* TODO*/}
+
                     <ul>
                       {herolist.reviews.map((review) => (
                         <li key={review._id}>

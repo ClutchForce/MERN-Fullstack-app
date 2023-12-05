@@ -9,6 +9,7 @@ export const AdminDashboard = () => {
   const [showReviews, setShowReviews] = useState(false);
   const [cookies] = useCookies(["access_token"]);
   const [policyContent, setPolicyContent] = useState('');
+  const [dmcaLogs, setDmcaLogs] = useState([]);
 
   const updatePolicy = async (policyName) => {
       try {
@@ -49,9 +50,22 @@ export const AdminDashboard = () => {
     }
   }, [cookies.access_token]);
 
+  const fetchDmcaLogs = useCallback(async () => {
+    try {
+      const response = await axios.get("/api/admin/policies/getDmcaLogs", {
+        headers: { Authorization: cookies.access_token }
+      });
+      setDmcaLogs(response.data);
+      console.log("dmca logs", response.data);
+    } catch (error) {
+      console.error('Error fetching DMCA logs:', error);
+    }
+  });
+
   useEffect(() => {
     fetchUsers();
     fetchReviews();
+    //fetchDmcaLogs();
   }, [fetchUsers, fetchReviews]); // Add fetch functions to the dependency array
 
   // Handlers for user and review management
@@ -114,6 +128,8 @@ export const AdminDashboard = () => {
       console.error('Error unhiding review:', error);
     }
   }, [cookies.access_token, fetchReviews]);
+
+
 
 
   return (
@@ -182,6 +198,26 @@ export const AdminDashboard = () => {
           <button onClick={() => updatePolicy('security-policy')}>Update Security Policy</button>
           <button onClick={() => updatePolicy('aup')}>Update AUP</button>
           <button onClick={() => updatePolicy('dmca-policy')}>Update DMCA Policy</button>
+        </div>
+      </ul>
+      <h3>DMCA takedown requests</h3>
+      <div>
+          <p>DMCA takedown procedure:</p>
+          <p>Tools to hide reviews with alleged copyright or AUP violations:</p>
+          <p>Tools to restore displaying of  any contested reviews:</p>
+          <p>Instructions, look at a log and then if you want to hide it go to the section above and find the corresponding review to hide:</p>
+        </div>
+      <ul>
+        <div>
+          <p>DMCA Logs:</p>
+          {/* {dmcaLogs.map(log => (
+            <li key={log._id}>
+              <p>Review ID: {log.reviewId}</p>
+              <p>Date Sent: {log.dateSent}</p>
+              <p>Notes: {log.notes}</p>
+              <p>Status: {log.status}</p>
+            </li>
+          ))} */}
         </div>
       </ul>
     </div>

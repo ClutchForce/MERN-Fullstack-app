@@ -23,6 +23,7 @@ app.use("/api/secure", verifyToken);
 // Routes after this will require authentication
 app.use("/api/secure/herolists", herolistsRouter);
 app.use("/api/secure/users", userRouter);
+app.use("/api/secure/policies", policiesRouter);
 // Additional secure routes...
 
 // Admin-specific routes

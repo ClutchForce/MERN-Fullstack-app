@@ -1,19 +1,6 @@
 import mongoose from "mongoose";
 import { reviewSchema } from "./Review.js"; 
 
-//List needs to inclue 
-//-----------------------
-//name of list REQUIRED
-//nickname of user [auto generated]
-//discription NON-REQUIRED
-//list of superheroes (accepts id string OR name) REQUIRED
-//Last modification date [auto generated]
-//isPublic Required [auto set to private]
-//number of heroes in list [auto generated]
-//average rating [auto generated]
-//list of comments [empty untill filled]
-//list of ratings [empty untill filled]
-
 const herolistSchema = mongoose.Schema({
   name: {
     type: String,
