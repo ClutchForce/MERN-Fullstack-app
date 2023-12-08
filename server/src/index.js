@@ -5,6 +5,13 @@ import { userRouter, verifyToken, verifyAdmin } from "./routes/user.js";
 import { herolistsRouter } from "./routes/herolists.js";
 import { heroinfoRouter } from "./routes/heroinfo.js"; // Import the superhero info router
 import { policiesRouter } from "./routes/policies.js";
+import path from "path";
+import { fileURLToPath } from 'url'; // Import the required method
+
+
+// Get the directory name of the current module
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 
 const PORT = process.env.PORT || 3001;
 
@@ -12,6 +19,8 @@ const app = express();
 
 app.use(express.json());
 app.use(cors());
+
+app.use(express.static(path.join(__dirname, '../../client/build')));
 
 app.use("/auth", userRouter);
 app.use("/api/open/herolists", herolistsRouter);
@@ -40,6 +49,10 @@ mongoose.connect(
     useUnifiedTopology: true,
   }
 );
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../client/build', 'index.html'));
+});
 
 app.listen(PORT, () => console.log("Server started"));
 

@@ -155,7 +155,7 @@ const Register = () => {
         </div>
         <button type="submit">Register</button>
       </form>
-      {emailToken && <div className="navbar">Click <div><a href={`http://localhost:3001/auth/verify-email/${emailToken}`}>here</a></div> to verify your email</div>}
+      {emailToken && <div className="navbar">Click <div><a href={`/auth/verify-email/${emailToken}`}>here</a></div> to verify your email</div>}
     </div>
   );
 };
