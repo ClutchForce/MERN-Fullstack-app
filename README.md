@@ -77,9 +77,10 @@ mongosh
   npm start
   ```
 
-### 🌐 Deploying on AWS
+## ☁️ Deploying on AWS
 
 This application is deployable on AWS and can be accessed [here](http://ec2-3-81-216-61.compute-1.amazonaws.com:4000/). (No longer available)
+
 To deploy: 
 - Ensure MongoDB is running:
 ```
