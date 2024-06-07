@@ -24,7 +24,7 @@ Superhero Explorer integrates several features:
 
 ## 🎬 Video Demo
 
-Explore the functionalities through our [Demo Video](#).
+Explore the functionalities through our [Demo Video](https://youtu.be/yhVZNZOPr8U).
 
 ## 🚀 Set Up
 
